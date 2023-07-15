@@ -1,0 +1,54 @@
+messages:
+  configuration-reload: '&7La configuration a été rechargé.'
+  # %author% -> Author name
+  # %title% -> Book title
+  book-archived: '&7Le livre &b%title%&7 écrit par &6%author%&7 a été archivé.'
+  errors:
+    permission-denied: '&cVous n''avez pas la permission.'
+    console-sender: '&cCette commande n''est pas utilisable depuis la console.'
+    no-book: '&cAucun livre n''est enregistrée sur le serveur.'
+    no-player-book: '&cCe joueur n''est auteur d''aucun livre enregistré.'
+  usages:
+    main: '&cUtilisation : /quill [reload]'
+
+menus:
+  global:
+    items:
+      close: '&cQuitter'
+      previous-page: '&7Page précédente'
+      next-page: '&7Page suivante'
+  all-players:
+    # %size% -> Total size of player archived books on the server
+    title: '&7Livres archivés (%size%)'
+    items:
+      player-head:
+        # %player% -> Author name
+        # %title% -> Book title
+        name: '&6%player%'
+        # %player% -> Author name
+        # %title% -> Book title
+        # %date% -> Date of creation
+        # %status% -> Book status
+        lore:
+          - '&7Titre : %title%'
+          - '&7Date : &d%date%'
+          - '&7Status : &b%status%'
+  player:
+    # %player% -> Player name
+    # %size% -> Total size of player deaths on the server
+    title: '&7Livres archivés de &6%player%&7 (%size%)'
+    items:
+      book:
+        # %title% -> Book title
+        name: '&b%title%'
+        # %date% -> Date of creation
+        # %status% -> Book status
+        lore:
+          - '&7Date : &d%date%'
+          - '&7Status : &b%status%'
+
+database:
+  username: stuffrestoreruser
+  password: 42)gZOgw.wd0z3tx
+  name: devminecraft
+  url: 'localhost:3306'
