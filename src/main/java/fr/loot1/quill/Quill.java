@@ -21,7 +21,6 @@ public class Quill extends JavaPlugin {
         Config.init();
 
         getCommand("quill").setExecutor(new QuillCommand());
-        getServer().getPluginManager().registerEvents(new PlayerEditBookListener(), this);
         getServer().getPluginManager().registerEvents(new GuiListener(), this);
 
         Database.connect();
