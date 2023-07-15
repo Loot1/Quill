@@ -33,9 +33,9 @@ public class QuillCommand implements CommandExecutor, TabCompleter {
                         Player p = (Player) sender;
                         if(sender.hasPermission("quill.archive")) {
                             //verif à mettre en place et livre à enlever de l'inventaire / auteur à changer par l'écrivain en BDD
-                            // mettre en place un string pour le split sur la BDD
                             BookMeta bookMeta = (BookMeta) p.getInventory().getItemInMainHand().getItemMeta();
-                            Database.addArchivedBook(p.getUniqueId(), bookMeta.getTitle(), bookMeta.getPages().toString());
+                            //OfflinePlayer author = main.getServer().getOfflinePlayer(bookMeta.getAuthor());
+                            Database.addArchivedBook(p.getUniqueId(), bookMeta.getTitle(), Database.encode(bookMeta.getPages()));
                             sender.sendMessage(Config.getColored("messages.book-archived").replace("%title%", bookMeta.getTitle()).replace("%author%", bookMeta.getAuthor()));
                         } else {
                             sender.sendMessage(Config.getColored("messages.errors.permission-denied"));

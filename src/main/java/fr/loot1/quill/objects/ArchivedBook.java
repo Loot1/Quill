@@ -1,6 +1,7 @@
 package fr.loot1.quill.objects;
 
 import fr.loot1.quill.Quill;
+import fr.loot1.quill.utils.Database;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -10,7 +11,6 @@ import org.bukkit.inventory.meta.BookMeta;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,7 +42,7 @@ public class ArchivedBook {
             this.status = data.getInt("status");
             this.title = data.getString("title");
             String content = data.getString("content");
-            this.pages = Arrays.asList(content.substring(1, content.length() - 1).split(","));
+            this.pages = Database.decode(content);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

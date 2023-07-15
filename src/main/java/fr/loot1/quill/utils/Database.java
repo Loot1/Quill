@@ -2,6 +2,7 @@ package fr.loot1.quill.utils;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -129,5 +130,15 @@ public class Database {
 //        }
 //        return false;
 //    }
+
+    private static final String encodingValue = "a&c@`-8a%";
+
+    public static String encode(final List<String> toEncode) {
+        return String.join(encodingValue, toEncode);
+    }
+
+    public static List<String> decode(final String toDecode) {
+        return Arrays.asList(toDecode.substring(1, toDecode.length() - 1).split(encodingValue));
+    }
 
 }
