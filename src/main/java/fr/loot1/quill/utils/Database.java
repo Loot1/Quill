@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.UUID;
 
 import fr.loot1.quill.Quill;
-import fr.loot1.quill.objects.ArchivedBook;
-import fr.loot1.quill.objects.ArchivedBooksList;
+import fr.loot1.quill.objects.Application;
+import fr.loot1.quill.objects.ApplicationList;
 
 public class Database {
 
@@ -71,47 +71,47 @@ public class Database {
         return false;
     }
 
-    public static ArchivedBooksList getArchivedBooks(final int limit, final int offset) {
+    public static ApplicationList getArchivedBooks(final int limit, final int offset) {
         try (PreparedStatement stmt = connection.prepareStatement("SELECT *, (SELECT COUNT(*) FROM quill) AS bookcount FROM quill ORDER BY createdAt DESC LIMIT " + limit + " OFFSET " + offset)) {
             ResultSet rs = stmt.executeQuery();
-            List<ArchivedBook> archivedBooks = new ArrayList<>();
+            List<Application> applications = new ArrayList<>();
             int count = 0;
             while (rs.next()) {
                 count = rs.getInt("bookcount");
-                archivedBooks.add(new ArchivedBook(rs));
+                applications.add(new Application(rs));
             }
-            return new ArchivedBooksList(archivedBooks, count);
+            return new ApplicationList(applications, count);
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public static ArchivedBooksList getPlayerArchivedBooks(final UUID uuid, final int limit, final int offset) {
+    public static ApplicationList getPlayerArchivedBooks(final UUID uuid, final int limit, final int offset) {
         try (PreparedStatement stmt = connection.prepareStatement("SELECT *, (SELECT COUNT(*) FROM quill WHERE uuid = ?) AS bookcount FROM quill WHERE uuid = ? ORDER BY createdAt DESC LIMIT " + limit + " OFFSET " + offset)) {
             stmt.setString(1, uuid.toString());
             stmt.setString(2, uuid.toString());
             ResultSet rs = stmt.executeQuery();
-            List<ArchivedBook> archivedBooks = new ArrayList<>();
+            List<Application> applications = new ArrayList<>();
             int count = 0;
             while (rs.next()) {
                 count = rs.getInt("bookcount");
-                archivedBooks.add(new ArchivedBook(rs));
+                applications.add(new Application(rs));
             }
-            return new ArchivedBooksList(archivedBooks, count);
+            return new ApplicationList(applications, count);
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public static ArchivedBook getArchivedBookById(final Integer id) {
+    public static Application getArchivedBookById(final Integer id) {
         try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM quill WHERE id = ?")) {
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
 
             if(rs.next()) {
-                return new ArchivedBook(rs);
+                return new Application(rs);
             }
         } catch (SQLException e) {
             e.printStackTrace();

@@ -1,7 +1,7 @@
 package fr.loot1.quill.guis;
 
-import fr.loot1.quill.objects.ArchivedBook;
-import fr.loot1.quill.objects.ArchivedBooksList;
+import fr.loot1.quill.objects.Application;
+import fr.loot1.quill.objects.ApplicationList;
 import fr.loot1.quill.utils.Config;
 import fr.loot1.quill.utils.Database;
 import org.bukkit.Bukkit;
@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-public class GuiPlayerArchives extends GuiHolder {
+public class GuiPlayerApplications extends GuiHolder {
 
     final static int archivedBooksPerPage = 45;
     private int archivedBooksCount;
@@ -27,9 +27,9 @@ public class GuiPlayerArchives extends GuiHolder {
 
     private final UUID playerToCheckUUID;
 
-    private List<ArchivedBook> archivedBooks;
+    private List<Application> applications;
 
-    HashMap<Integer, ArchivedBook> clickableArchivedBooks = new HashMap<>();
+    HashMap<Integer, Application> clickableArchivedBooks = new HashMap<>();
 
     @Override
     public @NotNull Inventory getInventory() {
@@ -38,8 +38,8 @@ public class GuiPlayerArchives extends GuiHolder {
         int maxPages = (int) Math.ceil((double) archivedBooksCount / archivedBooksPerPage);
         page = Math.min(maxPages, page);
 
-        for (int i = 0; i < archivedBooks.size(); i++) {
-            ArchivedBook toDisplayBook = archivedBooks.get(i);
+        for (int i = 0; i < applications.size(); i++) {
+            Application toDisplayBook = applications.get(i);
             inventory.setItem(i, itemGuiWithLore(
                     Material.WRITTEN_BOOK,
                     Config.getColored("menus.player.items.book.name").replace("%title%", toDisplayBook.getTitle()),
@@ -59,10 +59,10 @@ public class GuiPlayerArchives extends GuiHolder {
         return inventory;
     }
 
-    public GuiPlayerArchives(final Player playerWhoClicked, final OfflinePlayer playerToCheckBooks, final ArchivedBooksList archivedBooksList) {
+    public GuiPlayerApplications(final Player playerWhoClicked, final OfflinePlayer playerToCheckBooks, final ApplicationList applicationList) {
         playerToCheckUUID = playerToCheckBooks.getUniqueId();
-        archivedBooksCount = archivedBooksList.getCount();
-        archivedBooks = archivedBooksList.getData();
+        archivedBooksCount = applicationList.getCount();
+        applications = applicationList.getData();
         inventory = Bukkit.createInventory(this, 54, Config.getColored("menus.player.title").replace("%player%", playerToCheckBooks.getName()).replace("%size%", String.valueOf(archivedBooksCount)));
         playerWhoClicked.openInventory(getInventory());
     }
@@ -85,9 +85,9 @@ public class GuiPlayerArchives extends GuiHolder {
                 } else {
                     page++;
                 }
-                ArchivedBooksList archivedBooksList = Database.getPlayerArchivedBooks(playerToCheckUUID, archivedBooksPerPage, archivedBooksPerPage * page);
-                archivedBooksCount = archivedBooksList.getCount();
-                archivedBooks = archivedBooksList.getData();
+                ApplicationList applicationList = Database.getPlayerArchivedBooks(playerToCheckUUID, archivedBooksPerPage, archivedBooksPerPage * page);
+                archivedBooksCount = applicationList.getCount();
+                applications = applicationList.getData();
                 getInventory();
                 break;
             default:

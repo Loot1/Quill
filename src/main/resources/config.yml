@@ -2,13 +2,15 @@ messages:
   configuration-reload: '&7La configuration a été rechargé.'
   # %author% -> Author name
   # %title% -> Book title
-  book-archived: '&7Le livre &b%title%&7 écrit par &6%author%&7 a été archivé.'
+  apply-done: '&7La candidature &b%title%&7 a été envoyé.'
   errors:
     permission-denied: '&cVous n''avez pas la permission.'
     console-sender: '&cCette commande n''est pas utilisable depuis la console.'
-    no-book: '&cAucun livre n''est enregistrée sur le serveur.'
-    no-player-book: '&cCe joueur n''est auteur d''aucun livre enregistré.'
+    no-book: '&cAucune candidature n''est enregistrée sur le serveur.'
+    no-player-book: '&cCe joueur n''est auteur d''aucune candidature enregistrée.'
+    item-not-book: '&cL''objet doit être un livre signé.'
   usages:
+    look: '&cUtilisation : /quill look [joueur]'
     main: '&cUtilisation : /quill [reload]'
 
 menus:
@@ -19,7 +21,7 @@ menus:
       next-page: '&7Page suivante'
   all-players:
     # %size% -> Total size of player archived books on the server
-    title: '&7Livres archivés (%size%)'
+    title: '&7Candidatures archivées (%size%)'
     items:
       player-head:
         # %player% -> Author name
@@ -29,23 +31,27 @@ menus:
         # %title% -> Book title
         # %date% -> Date of creation
         # %status% -> Book status
+        # %pages% -> Pages number
         lore:
           - '&7Titre : %title%'
           - '&7Date : &d%date%'
           - '&7Status : &b%status%'
+          - '&7Pages : &b%pages%'
   player:
     # %player% -> Player name
     # %size% -> Total size of player deaths on the server
-    title: '&7Livres archivés de &6%player%&7 (%size%)'
+    title: '&7Candidatures archivées de &6%player%&7 (%size%)'
     items:
       book:
         # %title% -> Book title
         name: '&b%title%'
         # %date% -> Date of creation
         # %status% -> Book status
+        # %pages% -> Pages number
         lore:
           - '&7Date : &d%date%'
           - '&7Status : &b%status%'
+          - '&7Pages : &b%pages%'
 
 database:
   username: stuffrestoreruser

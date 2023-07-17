@@ -1,11 +1,12 @@
 package fr.loot1.quill.commands;
 
 import fr.loot1.quill.Quill;
-import fr.loot1.quill.guis.GuiArchives;
-import fr.loot1.quill.guis.GuiPlayerArchives;
-import fr.loot1.quill.objects.ArchivedBooksList;
+import fr.loot1.quill.guis.GuiApplications;
+import fr.loot1.quill.guis.GuiPlayerApplications;
+import fr.loot1.quill.objects.ApplicationList;
 import fr.loot1.quill.utils.Config;
 import fr.loot1.quill.utils.Database;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -13,6 +14,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
@@ -28,15 +30,19 @@ public class QuillCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String msg, String[] args) {
         if(args.length > 0) {
             switch(args[0].toLowerCase()) {
-                case "archive":
+                case "apply":
                     if(sender instanceof Player) {
                         Player p = (Player) sender;
-                        if(sender.hasPermission("quill.archive")) {
-                            //verif à mettre en place et livre à enlever de l'inventaire / auteur à changer par l'écrivain en BDD
-                            BookMeta bookMeta = (BookMeta) p.getInventory().getItemInMainHand().getItemMeta();
-                            //OfflinePlayer author = main.getServer().getOfflinePlayer(bookMeta.getAuthor());
-                            Database.addArchivedBook(p.getUniqueId(), bookMeta.getTitle(), Database.encode(bookMeta.getPages()));
-                            sender.sendMessage(Config.getColored("messages.book-archived").replace("%title%", bookMeta.getTitle()).replace("%author%", bookMeta.getAuthor()));
+                        if(sender.hasPermission("quill.apply")) {
+                            ItemStack book = p.getInventory().getItemInMainHand();
+                            if(book.getType() == Material.WRITTEN_BOOK) {
+                                BookMeta bookMeta = (BookMeta) book.getItemMeta();
+                                Database.addArchivedBook(p.getUniqueId(), bookMeta.getTitle(), Database.encode(bookMeta.getPages()));
+                                p.getInventory().remove(book);
+                                sender.sendMessage(Config.getColored("messages.apply-done").replace("%title%", bookMeta.getTitle()).replace("%author%", bookMeta.getAuthor()));
+                            } else {
+                                sender.sendMessage(Config.getColored("messages.errors.item-not-book"));
+                            }
                         } else {
                             sender.sendMessage(Config.getColored("messages.errors.permission-denied"));
                         }
@@ -46,16 +52,16 @@ public class QuillCommand implements CommandExecutor, TabCompleter {
                     break;
                 case "look":
                     if(sender instanceof Player) {
-                        if(sender.hasPermission("quill.archives")) {
+                        if(sender.hasPermission("quill.look")) {
                             if(args.length > 1) {
                                 OfflinePlayer player;
                                 player = main.getServer().getOfflinePlayer(args[1]);
                                 if(player.hasPlayedBefore()) {
-                                    ArchivedBooksList archivedBooks = Database.getPlayerArchivedBooks(player.getUniqueId(), GuiPlayerArchives.getArchivedBooksPerPage(), 0);
+                                    ApplicationList archivedBooks = Database.getPlayerArchivedBooks(player.getUniqueId(), GuiPlayerApplications.getArchivedBooksPerPage(), 0);
                                     if(archivedBooks.getCount() == 0) {
                                         sender.sendMessage(Config.getColored("messages.errors.no-player-book"));
                                     } else {
-                                        new GuiPlayerArchives((Player) sender, player, archivedBooks);
+                                        new GuiPlayerApplications((Player) sender, player, archivedBooks);
                                     }
                                 } else {
                                     sender.sendMessage(Config.getColored("messages.errors.unknown-player"));
@@ -84,12 +90,12 @@ public class QuillCommand implements CommandExecutor, TabCompleter {
             }
         } else {
             if(sender instanceof Player) {
-                if(sender.hasPermission("quill.archives")) {
-                    ArchivedBooksList archivedBooksList = Database.getArchivedBooks(GuiArchives.getArchivedBooksPerPage(), 0);
-                    if(archivedBooksList.getCount() == 0) {
+                if(sender.hasPermission("quill.look")) {
+                    ApplicationList applicationList = Database.getArchivedBooks(GuiApplications.getArchivedBooksPerPage(), 0);
+                    if(applicationList.getCount() == 0) {
                         sender.sendMessage(Config.getColored("messages.errors.no-book"));
                     } else {
-                        new GuiArchives((Player) sender, archivedBooksList);
+                        new GuiApplications((Player) sender, applicationList);
                     }
                 } else {
                     sender.sendMessage(Config.getColored("messages.errors.permission-denied"));

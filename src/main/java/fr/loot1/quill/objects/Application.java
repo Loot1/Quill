@@ -14,7 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.UUID;
 
-public class ArchivedBook {
+public class Application {
 
     final static Quill main = Quill.getInstance();
 
@@ -33,7 +33,9 @@ public class ArchivedBook {
 
     public String getTitle() { return title; }
 
-    public ArchivedBook(ResultSet data) {
+    public Integer getPageNumber() { return pages.size(); }
+
+    public Application(ResultSet data) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy à HH:mm:ss");
         try {
             UUID uuid = UUID.fromString(data.getString("uuid"));
@@ -53,7 +55,7 @@ public class ArchivedBook {
         BookMeta bookMeta = (BookMeta) book.getItemMeta();
         if(bookMeta != null) {
             bookMeta.setTitle(title);
-            bookMeta.setAuthor("Louwh");
+            bookMeta.setAuthor(player.getName());
             bookMeta.setGeneration(BookMeta.Generation.ORIGINAL);
             bookMeta.setPages(pages);
         }
