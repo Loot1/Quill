@@ -2,16 +2,15 @@ messages:
   configuration-reload: '&7La configuration a été rechargé.'
   # %author% -> Author name
   # %title% -> Book title
-  apply-done: '&7La candidature &b%title%&7 a été envoyé.'
+  apply-done: '&7La candidature &d%title%&7 a été envoyé.'
   errors:
     permission-denied: '&cVous n''avez pas la permission.'
     console-sender: '&cCette commande n''est pas utilisable depuis la console.'
-    no-book: '&cAucune candidature n''est enregistrée sur le serveur.'
-    no-player-book: '&cCe joueur n''est auteur d''aucune candidature enregistrée.'
+    no-application: '&cAucune candidature n''est enregistrée.'
     item-not-book: '&cL''objet doit être un livre signé.'
   usages:
     look: '&cUtilisation : /quill look [joueur]'
-    main: '&cUtilisation : /quill [reload]'
+    main: '&cUtilisation : /quill [apply|look|reload]'
 
 menus:
   global:
@@ -20,8 +19,7 @@ menus:
       previous-page: '&7Page précédente'
       next-page: '&7Page suivante'
   all-players:
-    # %size% -> Total size of player archived books on the server
-    title: '&7Candidatures archivées (%size%)'
+    title: '&7Candidatures'
     items:
       player-head:
         # %player% -> Author name
@@ -40,7 +38,7 @@ menus:
   player:
     # %player% -> Player name
     # %size% -> Total size of player deaths on the server
-    title: '&7Candidatures archivées de &6%player%&7 (%size%)'
+    title: '&7Candidatures de &6%player%&7 (%size%)'
     items:
       book:
         # %title% -> Book title
@@ -52,6 +50,21 @@ menus:
           - '&7Date : &d%date%'
           - '&7Status : &b%status%'
           - '&7Pages : &b%pages%'
+  application:
+    # %mount% -> Book title
+    title: '&b%title%'
+    items:
+      waiting-color: '&e'
+      accepted-color: '&a'
+      refused-color: '&c'
+      archived-color: '&8'
+
+settings:
+  status:
+    waiting: "En attente"
+    accepted: "Acceptée"
+    refused: "Refusée"
+    archived: "Archivée"
 
 database:
   username: stuffrestoreruser

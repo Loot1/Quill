@@ -37,7 +37,7 @@ public class QuillCommand implements CommandExecutor, TabCompleter {
                             ItemStack book = p.getInventory().getItemInMainHand();
                             if(book.getType() == Material.WRITTEN_BOOK) {
                                 BookMeta bookMeta = (BookMeta) book.getItemMeta();
-                                Database.addArchivedBook(p.getUniqueId(), bookMeta.getTitle(), Database.encode(bookMeta.getPages()));
+                                Database.addApplication(p.getUniqueId(), bookMeta.getTitle(), Database.encode(bookMeta.getPages()));
                                 p.getInventory().remove(book);
                                 sender.sendMessage(Config.getColored("messages.apply-done").replace("%title%", bookMeta.getTitle()).replace("%author%", bookMeta.getAuthor()));
                             } else {
@@ -57,11 +57,11 @@ public class QuillCommand implements CommandExecutor, TabCompleter {
                                 OfflinePlayer player;
                                 player = main.getServer().getOfflinePlayer(args[1]);
                                 if(player.hasPlayedBefore()) {
-                                    ApplicationList archivedBooks = Database.getPlayerArchivedBooks(player.getUniqueId(), GuiPlayerApplications.getArchivedBooksPerPage(), 0);
-                                    if(archivedBooks.getCount() == 0) {
-                                        sender.sendMessage(Config.getColored("messages.errors.no-player-book"));
+                                    ApplicationList applications = Database.getPlayerApplications(player.getUniqueId(), GuiPlayerApplications.getApplicationsPerPage(), 0);
+                                    if(applications.getCount() == 0) {
+                                        sender.sendMessage(Config.getColored("messages.errors.no-application"));
                                     } else {
-                                        new GuiPlayerApplications((Player) sender, player, archivedBooks);
+                                        new GuiPlayerApplications((Player) sender, player, applications);
                                     }
                                 } else {
                                     sender.sendMessage(Config.getColored("messages.errors.unknown-player"));
@@ -91,9 +91,9 @@ public class QuillCommand implements CommandExecutor, TabCompleter {
         } else {
             if(sender instanceof Player) {
                 if(sender.hasPermission("quill.look")) {
-                    ApplicationList applicationList = Database.getArchivedBooks(GuiApplications.getArchivedBooksPerPage(), 0);
+                    ApplicationList applicationList = Database.getApplications(GuiApplications.getApplicationsPerPage(), 0);
                     if(applicationList.getCount() == 0) {
-                        sender.sendMessage(Config.getColored("messages.errors.no-book"));
+                        sender.sendMessage(Config.getColored("messages.errors.no-application"));
                     } else {
                         new GuiApplications((Player) sender, applicationList);
                     }
@@ -107,7 +107,7 @@ public class QuillCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    private static final List<String> SUBCOMMANDS = Arrays.asList("archive", "look", "reload");
+    private static final List<String> SUBCOMMANDS = Arrays.asList("apply", "look", "reload");
     private static final List<String> BLANK = Collections.emptyList();
 
     @Override

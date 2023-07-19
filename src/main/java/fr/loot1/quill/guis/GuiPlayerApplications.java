@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
@@ -19,8 +20,8 @@ import java.util.UUID;
 
 public class GuiPlayerApplications extends GuiHolder {
 
-    final static int archivedBooksPerPage = 45;
-    private int archivedBooksCount;
+    final static int applicationsPerPage = 45;
+    private int applicationCount;
 
     protected Inventory inventory;
     protected int page = 0;
@@ -29,13 +30,13 @@ public class GuiPlayerApplications extends GuiHolder {
 
     private List<Application> applications;
 
-    HashMap<Integer, Application> clickableArchivedBooks = new HashMap<>();
+    HashMap<Integer, Application> clickableApplications = new HashMap<>();
 
     @Override
     public @NotNull Inventory getInventory() {
         inventory.clear();
 
-        int maxPages = (int) Math.ceil((double) archivedBooksCount / archivedBooksPerPage);
+        int maxPages = (int) Math.ceil((double) applicationCount / applicationsPerPage);
         page = Math.min(maxPages, page);
 
         for (int i = 0; i < applications.size(); i++) {
@@ -45,7 +46,7 @@ public class GuiPlayerApplications extends GuiHolder {
                     Config.getColored("menus.player.items.book.name").replace("%title%", toDisplayBook.getTitle()),
                     formatLore(Config.getColoredList("menus.player.items.book.lore"), toDisplayBook)
             ));
-            clickableArchivedBooks.put(i, toDisplayBook);
+            clickableApplications.put(i, toDisplayBook);
         }
 
         if (page > 0) {
@@ -61,9 +62,9 @@ public class GuiPlayerApplications extends GuiHolder {
 
     public GuiPlayerApplications(final Player playerWhoClicked, final OfflinePlayer playerToCheckBooks, final ApplicationList applicationList) {
         playerToCheckUUID = playerToCheckBooks.getUniqueId();
-        archivedBooksCount = applicationList.getCount();
+        applicationCount = applicationList.getCount();
         applications = applicationList.getData();
-        inventory = Bukkit.createInventory(this, 54, Config.getColored("menus.player.title").replace("%player%", playerToCheckBooks.getName()).replace("%size%", String.valueOf(archivedBooksCount)));
+        inventory = Bukkit.createInventory(this, 54, Config.getColored("menus.player.title").replace("%player%", playerToCheckBooks.getName()).replace("%size%", String.valueOf(applicationCount)));
         playerWhoClicked.openInventory(getInventory());
     }
 
@@ -74,7 +75,13 @@ public class GuiPlayerApplications extends GuiHolder {
 
         switch (clickedMaterial) {
             case WRITTEN_BOOK:
-                clickableArchivedBooks.get(event.getSlot()).open(player);
+                final ClickType click = event.getClick();
+                Application clickedApplication = clickableApplications.get(event.getSlot());
+                if (click.isLeftClick()) {
+                    clickedApplication.open(player);
+                } else if (click.isRightClick()) {
+                    new GuiApplicationManager(player, clickedApplication);
+                }
                 break;
             case BARRIER:
                 player.closeInventory();
@@ -85,8 +92,8 @@ public class GuiPlayerApplications extends GuiHolder {
                 } else {
                     page++;
                 }
-                ApplicationList applicationList = Database.getPlayerArchivedBooks(playerToCheckUUID, archivedBooksPerPage, archivedBooksPerPage * page);
-                archivedBooksCount = applicationList.getCount();
+                ApplicationList applicationList = Database.getPlayerApplications(playerToCheckUUID, applicationsPerPage, applicationsPerPage * page);
+                applicationCount = applicationList.getCount();
                 applications = applicationList.getData();
                 getInventory();
                 break;
@@ -101,6 +108,6 @@ public class GuiPlayerApplications extends GuiHolder {
         event.setCancelled(true);
     }
 
-    public static int getArchivedBooksPerPage() { return archivedBooksPerPage; }
+    public static int getApplicationsPerPage() { return applicationsPerPage; }
 
 }

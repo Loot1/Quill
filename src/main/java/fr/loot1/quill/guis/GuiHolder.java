@@ -46,7 +46,7 @@ public abstract class GuiHolder implements InventoryHolder {
         return item;
     }
 
-    public ItemStack headGui(final OfflinePlayer player, final String name, final List<String> lore) {
+    public ItemStack playerHeadGui(final OfflinePlayer player, final String name, final List<String> lore) {
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta headMeta = (SkullMeta) head.getItemMeta();
         if (headMeta != null) {
@@ -58,14 +58,23 @@ public abstract class GuiHolder implements InventoryHolder {
         return head;
     }
 
+    public ItemStack headGui(final ItemStack head, final String name, final List<String> lore) {
+        SkullMeta headMeta = (SkullMeta) head.getItemMeta();
+        if (headMeta != null) {
+            headMeta.setDisplayName(name);
+            headMeta.setLore(lore);
+        }
+        head.setItemMeta(headMeta);
+        return head;
+    }
+
     public List<String> formatLore(final List<String> lore, final Application application) {
         lore.replaceAll(s -> s.replaceAll("%player%", application.getAuthor().getName()));
         lore.replaceAll(s -> s.replaceAll("%title%", application.getTitle()));
         lore.replaceAll(s -> s.replaceAll("%date%", application.getDate()));
-        lore.replaceAll(s -> s.replaceAll("%status%", String.valueOf(application.getStatus())));
+        lore.replaceAll(s -> s.replaceAll("%status%", application.getStatus().getText()));
         lore.replaceAll(s -> s.replaceAll("%pages%", String.valueOf(application.getPageNumber())));
         return lore;
     }
-
 
 }

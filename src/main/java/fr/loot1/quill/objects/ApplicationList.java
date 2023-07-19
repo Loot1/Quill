@@ -4,11 +4,11 @@ import java.util.List;
 
 public class ApplicationList {
     private final List<Application> applications;
-    private final int archivedBooksCount;
+    private final int applicationCount;
 
     public ApplicationList(List<Application> list, int count) {
         this.applications = list;
-        this.archivedBooksCount = count;
+        this.applicationCount = count;
     }
 
     public List<Application> getData() {
@@ -16,6 +16,6 @@ public class ApplicationList {
     }
 
     public int getCount() {
-        return archivedBooksCount;
+        return applicationCount;
     }
 }
