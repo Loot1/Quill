@@ -2,6 +2,7 @@ package fr.loot1.quill;
 
 import fr.loot1.quill.commands.QuillCommand;
 import fr.loot1.quill.listeners.GuiListener;
+import fr.loot1.quill.listeners.PlayerJoinListener;
 import fr.loot1.quill.utils.Config;
 import fr.loot1.quill.utils.Database;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -21,6 +22,7 @@ public class Quill extends JavaPlugin {
         Config.init();
 
         getCommand("quill").setExecutor(new QuillCommand());
+        getServer().getPluginManager().registerEvents(new PlayerJoinListener(), this);
         getServer().getPluginManager().registerEvents(new GuiListener(), this);
 
         Database.connect();

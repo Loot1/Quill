@@ -40,6 +40,9 @@ public class QuillCommand implements CommandExecutor, TabCompleter {
                                 Database.addApplication(p.getUniqueId(), bookMeta.getTitle(), Database.encode(bookMeta.getPages()));
                                 p.getInventory().remove(book);
                                 sender.sendMessage(Config.getColored("messages.apply-done").replace("%title%", bookMeta.getTitle()).replace("%author%", bookMeta.getAuthor()));
+                                main.getServer().getOnlinePlayers().stream()
+                                        .filter(playerToNotify -> playerToNotify.hasPermission("quill.notify"))
+                                        .forEach(playerToNotify -> playerToNotify.sendMessage(Config.getColored("messages.notification-new-apply").replace("%author%", bookMeta.getAuthor())));
                             } else {
                                 sender.sendMessage(Config.getColored("messages.errors.item-not-book"));
                             }

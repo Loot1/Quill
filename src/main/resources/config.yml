@@ -3,6 +3,10 @@ messages:
   # %author% -> Author name
   # %title% -> Book title
   apply-done: '&7La candidature &d%title%&7 a été envoyé.'
+  # %author% -> Author name
+  notification-new-apply: '&7[&9Quill&7] &6%author%&7 vient de soumettre une nouvelle candidature.'
+  # %count% -> Applications count
+  notification-on-join: '&7[&9Quill&7] &b%count%&7 candidatures sont en attente.'
   errors:
     permission-denied: '&cVous n''avez pas la permission.'
     console-sender: '&cCette commande n''est pas utilisable depuis la console.'

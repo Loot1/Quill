@@ -11,7 +11,23 @@ permissions:
     description: Allows all permissions of Quill plugin
     default: op
     children:
-      groom.reload: true
+      quill.apply: true
+      quill.look: true
+      quill.notify: true
+      quill.reload: true
+      quill.status: true
+  quill.apply:
+    description: Allows to apply
+    default: op
+  quill.look:
+    description: Allows to look applications
+    default: op
+  quill.notify:
+    description: Allows to have a notification if some applications are waiting
+    default: op
   quill.reload:
     description: Allows to reload plugin configuration file
+    default: op
+  quill.status:
+    description: Allows to change the status of an application
     default: op
