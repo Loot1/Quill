@@ -3,6 +3,7 @@ package fr.loot1.quill.objects;
 import java.util.List;
 
 public class ApplicationList {
+
     private final List<Application> applications;
     private final int applicationCount;
 
@@ -18,4 +19,5 @@ public class ApplicationList {
     public int getCount() {
         return applicationCount;
     }
+
 }

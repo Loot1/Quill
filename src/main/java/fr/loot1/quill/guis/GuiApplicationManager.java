@@ -1,5 +1,6 @@
 package fr.loot1.quill.guis;
 
+import fr.loot1.quill.Quill;
 import fr.loot1.quill.objects.Application;
 import fr.loot1.quill.utils.Config;
 import fr.loot1.quill.utils.GlowHelper;
@@ -16,20 +17,23 @@ public class GuiApplicationManager extends GuiHolder {
     protected Inventory inventory;
     private final Application application;
 
+    private final Config config;
+
     @Override
     public @NotNull Inventory getInventory() {
-        inventory = Bukkit.createInventory(this, 9, Config.getColored("menus.application.title").replace("%title%", application.getTitle()));
+        inventory = Bukkit.createInventory(this, 9, config.getColored("menus.application.title").replace("%title%", application.getTitle()));
 
         for (Application.ApplicationStatus status : Application.ApplicationStatus.values()) {
             inventory.setItem(status.getValue(), status == application.getStatus() ? GlowHelper.glow(status.getButton()) : status.getButton());
         }
 
-        inventory.setItem(8, itemGui(Material.BARRIER, Config.getColored("menus.global.items.close")));
+        inventory.setItem(8, itemGui(Material.BARRIER, config.getColored("menus.global.items.close")));
         return inventory;
     }
 
-    public GuiApplicationManager(final Player playerWhoClicked, final Application app) {
+    public GuiApplicationManager(final Player playerWhoClicked, final Application app, final Quill quill) {
         application = app;
+        config = quill.getConfigManager();
         playerWhoClicked.openInventory(getInventory());
     }
 
@@ -53,7 +57,7 @@ public class GuiApplicationManager extends GuiHolder {
                             inventory.setItem(oldStatus.getValue(), oldStatus.getButton());
                         }
                     } else {
-                        player.sendMessage(Config.getColored("messages.errors.permission-denied"));
+                        player.sendMessage(config.getColored("messages.errors.permission-denied"));
                         player.closeInventory();
                     }
                 }

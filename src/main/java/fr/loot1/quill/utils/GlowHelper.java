@@ -6,6 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class GlowHelper {
+
     public static ItemStack glow(final ItemStack item) {
         final ItemMeta meta = item.getItemMeta();
         if (meta != null) {
@@ -15,4 +16,5 @@ public class GlowHelper {
         item.setItemMeta(meta);
         return item;
     }
+
 }

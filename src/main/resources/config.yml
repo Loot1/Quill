@@ -12,6 +12,8 @@ messages:
     console-sender: '&cCette commande n''est pas utilisable depuis la console.'
     no-application: '&cAucune candidature n''est enregistrée.'
     item-not-book: '&cL''objet doit être un livre signé.'
+    # %player% -> Player not founded
+    player-not-found: '&c%player% n''a pas été trouvé.'
   usages:
     look: '&cUtilisation : /quill look [joueur]'
     main: '&cUtilisation : /quill [apply|look|reload]'

@@ -5,24 +5,33 @@ import java.util.List;
 
 import fr.loot1.quill.Quill;
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.file.FileConfiguration;
 
 public class Config {
 
-    final static Quill main = Quill.getInstance();
-    final static File configFile = new File(main.getDataFolder(), "config.yml");
+    private final Quill main;
+    private final File configFile;
+    private final FileConfiguration config;
 
-    private static void create() {
+    public Config(Quill quill) {
+        this.main = quill;
+        this.configFile = new File(quill.getDataFolder(), "config.yml");
+        this.config = quill.getConfig();
+        init();
+    }
+
+    private void create() {
         main.saveDefaultConfig();
         main.getLogger().info("Configuration file added");
     }
 
-    public static void init() {
+    public void init() {
         if(!configFile.exists()) {
             create();
         }
     }
 
-    public static void reload() {
+    public void reload() {
         if(configFile.exists()) {
             main.getLogger().info("Configuration file reloaded");
         } else {
@@ -31,9 +40,9 @@ public class Config {
         main.reloadConfig();
     }
 
-    public static List<String> getColoredList(final String path) {
-        if(main.getConfig().contains(path)) {
-            List<String> messages = main.getConfig().getStringList(path);
+    public List<String> getColoredList(final String path) {
+        if(this.config.contains(path)) {
+            List<String> messages = this.config.getStringList(path);
             messages.replaceAll(msgToColor -> ChatColor.translateAlternateColorCodes('&', msgToColor));
             return messages;
         }
@@ -41,17 +50,17 @@ public class Config {
         return null;
     }
 
-    public static String getColored(final String path) {
-        if(main.getConfig().contains(path)) {
-            return ChatColor.translateAlternateColorCodes('&', main.getConfig().getString(path));
+    public String getColored(final String path) {
+        if(this.config.contains(path)) {
+            return ChatColor.translateAlternateColorCodes('&', this.config.getString(path));
         }
         main.getLogger().severe("This value doesn't exist in configuration file :" + path);
         return "";
     }
 
-    public static String get(final String path) {
-        if(main.getConfig().contains(path)) {
-            return main.getConfig().getString(path);
+    public String get(final String path) {
+        if(this.config.contains(path)) {
+            return this.config.getString(path);
         }
         main.getLogger().severe("This value doesn't exist in configuration file :" + path);
         return null;

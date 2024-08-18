@@ -6,6 +6,7 @@ import fr.loot1.quill.guis.GuiPlayerApplications;
 import fr.loot1.quill.objects.ApplicationList;
 import fr.loot1.quill.utils.Config;
 import fr.loot1.quill.utils.Database;
+import fr.loot1.quill.utils.PlayerCacheManager;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -20,37 +21,45 @@ import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class QuillCommand implements CommandExecutor, TabCompleter {
 
-    final static Quill main = Quill.getInstance();
+    private final Quill main;
+    private final Database database;
+    private final Config config;
+    private final PlayerCacheManager playerCacheManager;
+
+    public QuillCommand(Quill quill) {
+        this.main = quill;
+        this.database = quill.getDatabase();
+        this.config = quill.getConfigManager();
+        this.playerCacheManager = quill.getPlayerCacheManager();
+    }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String msg, String[] args) {
         if(args.length > 0) {
             switch(args[0].toLowerCase()) {
                 case "apply":
-                    if(sender instanceof Player) {
-                        Player p = (Player) sender;
+                    if(sender instanceof Player p) {
                         if(sender.hasPermission("quill.apply")) {
                             ItemStack book = p.getInventory().getItemInMainHand();
                             if(book.getType() == Material.WRITTEN_BOOK) {
                                 BookMeta bookMeta = (BookMeta) book.getItemMeta();
-                                Database.addApplication(p.getUniqueId(), bookMeta.getTitle(), Database.encode(bookMeta.getPages()));
+                                database.addApplication(p.getUniqueId(), bookMeta.getTitle(), database.encode(bookMeta.getPages()));
                                 p.getInventory().remove(book);
-                                sender.sendMessage(Config.getColored("messages.apply-done").replace("%title%", bookMeta.getTitle()).replace("%author%", bookMeta.getAuthor()));
+                                sender.sendMessage(config.getColored("messages.apply-done").replace("%title%", bookMeta.getTitle()).replace("%author%", bookMeta.getAuthor()));
                                 main.getServer().getOnlinePlayers().stream()
                                         .filter(playerToNotify -> playerToNotify.hasPermission("quill.notify"))
-                                        .forEach(playerToNotify -> playerToNotify.sendMessage(Config.getColored("messages.notification-new-apply").replace("%author%", bookMeta.getAuthor())));
+                                        .forEach(playerToNotify -> playerToNotify.sendMessage(config.getColored("messages.notification-new-apply").replace("%author%", bookMeta.getAuthor())));
                             } else {
-                                sender.sendMessage(Config.getColored("messages.errors.item-not-book"));
+                                sender.sendMessage(config.getColored("messages.errors.item-not-book"));
                             }
                         } else {
-                            sender.sendMessage(Config.getColored("messages.errors.permission-denied"));
+                            sender.sendMessage(config.getColored("messages.errors.permission-denied"));
                         }
                     } else {
-                        sender.sendMessage(Config.getColored("messages.errors.console-sender"));
+                        sender.sendMessage(config.getColored("messages.errors.console-sender"));
                     }
                     break;
                 case "look":
@@ -60,51 +69,51 @@ public class QuillCommand implements CommandExecutor, TabCompleter {
                                 OfflinePlayer player;
                                 player = main.getServer().getOfflinePlayer(args[1]);
                                 if(player.hasPlayedBefore()) {
-                                    ApplicationList applications = Database.getPlayerApplications(player.getUniqueId(), GuiPlayerApplications.getApplicationsPerPage(), 0);
+                                    ApplicationList applications = database.getPlayerApplications(player.getUniqueId(), GuiPlayerApplications.getApplicationsPerPage(), 0);
                                     if(applications.getCount() == 0) {
-                                        sender.sendMessage(Config.getColored("messages.errors.no-application"));
+                                        sender.sendMessage(config.getColored("messages.errors.no-application"));
                                     } else {
-                                        new GuiPlayerApplications((Player) sender, player, applications);
+                                        new GuiPlayerApplications((Player) sender, player, applications, main);
                                     }
                                 } else {
-                                    sender.sendMessage(Config.getColored("messages.errors.unknown-player"));
+                                    sender.sendMessage(config.getColored("messages.errors.player-not-found").replace("%player%", args[1]));
                                 }
                             } else {
-                                sender.sendMessage(Config.getColored("messages.usages.look"));
+                                sender.sendMessage(config.getColored("messages.usages.look"));
                             }
                         } else {
-                            sender.sendMessage(Config.getColored("messages.errors.permission-denied"));
+                            sender.sendMessage(config.getColored("messages.errors.permission-denied"));
                         }
                     } else {
-                        sender.sendMessage(Config.getColored("messages.errors.console-sender"));
+                        sender.sendMessage(config.getColored("messages.errors.console-sender"));
                     }
                     break;
                 case "reload":
                     if(sender.hasPermission("quill.reload")) {
-                        Config.reload();
-                        sender.sendMessage(Config.getColored("messages.configuration-reload"));
+                        config.reload();
+                        sender.sendMessage(config.getColored("messages.configuration-reload"));
                     } else {
-                        sender.sendMessage(Config.getColored("messages.errors.permission-denied"));
+                        sender.sendMessage(config.getColored("messages.errors.permission-denied"));
                     }
                     break;
                 default:
-                    sender.sendMessage(Config.getColored("messages.usages.main"));
+                    sender.sendMessage(config.getColored("messages.usages.main"));
                     break;
             }
         } else {
             if(sender instanceof Player) {
                 if(sender.hasPermission("quill.look")) {
-                    ApplicationList applicationList = Database.getApplications(GuiApplications.getApplicationsPerPage(), 0);
+                    ApplicationList applicationList = database.getApplications(GuiApplications.getApplicationsPerPage(), 0);
                     if(applicationList.getCount() == 0) {
-                        sender.sendMessage(Config.getColored("messages.errors.no-application"));
+                        sender.sendMessage(config.getColored("messages.errors.no-application"));
                     } else {
-                        new GuiApplications((Player) sender, applicationList);
+                        new GuiApplications((Player) sender, applicationList, main);
                     }
                 } else {
-                    sender.sendMessage(Config.getColored("messages.errors.permission-denied"));
+                    sender.sendMessage(config.getColored("messages.errors.permission-denied"));
                 }
             } else {
-                sender.sendMessage(Config.getColored("messages.errors.console-sender"));
+                sender.sendMessage(config.getColored("messages.errors.console-sender"));
             }
         }
         return true;
@@ -118,11 +127,7 @@ public class QuillCommand implements CommandExecutor, TabCompleter {
         if (args.length <= 1) {
             return StringUtil.copyPartialMatches(args[0], SUBCOMMANDS, new ArrayList<>());
         } else if(args.length == 2 && args[0].equalsIgnoreCase("look")) {
-            List<String> offlinePlayers = Arrays
-                    .stream(main.getServer().getOfflinePlayers())
-                    .map(OfflinePlayer::getName)
-                    .collect(Collectors.toList());
-            return StringUtil.copyPartialMatches(args[1], offlinePlayers, new ArrayList<>());
+            return StringUtil.copyPartialMatches(args[1], playerCacheManager.getCachedPlayerNames(), new ArrayList<>());
         }
         return BLANK;
     }

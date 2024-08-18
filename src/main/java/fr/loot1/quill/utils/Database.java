@@ -12,15 +12,23 @@ import fr.loot1.quill.objects.ApplicationList;
 
 public class Database {
 
-    final static Quill main = Quill.getInstance();
+    private final Quill main;
+    private final String username;
+    private final String password;
+    private final String url;
 
-    final static String username = Config.get("database.username");
-    final static String password = Config.get("database.password");
-    final static String url = "jdbc:mysql://" + Config.get("database.url") + "/" + Config.get("database.name");
+    private Connection connection;
 
-    static Connection connection;
+    public Database(Quill quill) {
+        this.main = quill;
+        Config config = quill.getConfigManager();
+        this.username = config.get("database.username");
+        this.password = config.get("database.password");
+        this.url = "jdbc:mysql://" + config.get("database.url") + "/" + config.get("database.name");
+        connect();
+    }
 
-    public static void connect() {
+    public void connect() {
         try {
             connection = DriverManager.getConnection(url, username, password);
             main.getLogger().info("Database connection successful");
@@ -43,7 +51,7 @@ public class Database {
         }
     }
 
-    public static void disconnect() {
+    public void disconnect() {
         try {
             if (connection != null && !connection.isClosed()) {
                 connection.close();
@@ -55,7 +63,7 @@ public class Database {
         }
     }
 
-    public static boolean addApplication(final UUID uuid, final String title, final String content) {
+    public boolean addApplication(final UUID uuid, final String title, final String content) {
         try (PreparedStatement stmt = connection.prepareStatement(
                 "INSERT INTO quill(id, uuid, createdAt, status, title, content) VALUES (?, ?, CURRENT_TIMESTAMP, 0, ?, ?)"
         )) {
@@ -71,14 +79,14 @@ public class Database {
         return false;
     }
 
-    public static ApplicationList getApplications(final int limit, final int offset) {
+    public ApplicationList getApplications(final int limit, final int offset) {
         try (PreparedStatement stmt = connection.prepareStatement("SELECT *, (SELECT COUNT(*) FROM quill) AS bookcount FROM quill ORDER BY createdAt DESC LIMIT " + limit + " OFFSET " + offset)) {
             ResultSet rs = stmt.executeQuery();
             List<Application> applications = new ArrayList<>();
             int count = 0;
             while (rs.next()) {
                 count = rs.getInt("bookcount");
-                applications.add(new Application(rs));
+                applications.add(new Application(rs, main));
             }
             return new ApplicationList(applications, count);
         } catch (SQLException e) {
@@ -87,7 +95,7 @@ public class Database {
         return null;
     }
 
-    public static ApplicationList getApplicationsByStatus(final boolean waiting, final boolean accepted, final boolean refused, final boolean archived, final int limit, final int offset) {
+    public ApplicationList getApplicationsByStatus(final boolean waiting, final boolean accepted, final boolean refused, final boolean archived, final int limit, final int offset) {
         try (PreparedStatement stmt = connection.prepareStatement("SELECT *, (SELECT COUNT(*) FROM quill WHERE (status IN (?, ?, ?, ?) OR NOT ? AND NOT ? AND NOT ? AND NOT ?)) AS bookcount FROM quill WHERE (status IN (?, ?, ?, ?) OR NOT ? AND NOT ? AND NOT ? AND NOT ?) ORDER BY createdAt DESC LIMIT " + limit + " OFFSET " + offset)) {
             stmt.setInt(1, waiting ? 0 : 9);
             stmt.setInt(2, accepted ? 1 : 9);
@@ -110,7 +118,7 @@ public class Database {
             int count = 0;
             while (rs.next()) {
                 count = rs.getInt("bookcount");
-                applications.add(new Application(rs));
+                applications.add(new Application(rs, main));
             }
             return new ApplicationList(applications, count);
         } catch (SQLException e) {
@@ -119,7 +127,7 @@ public class Database {
         return null;
     }
 
-    public static ApplicationList getPlayerApplications(final UUID uuid, final int limit, final int offset) {
+    public ApplicationList getPlayerApplications(final UUID uuid, final int limit, final int offset) {
         try (PreparedStatement stmt = connection.prepareStatement("SELECT *, (SELECT COUNT(*) FROM quill WHERE uuid = ?) AS bookcount FROM quill WHERE uuid = ? ORDER BY createdAt DESC LIMIT " + limit + " OFFSET " + offset)) {
             stmt.setString(1, uuid.toString());
             stmt.setString(2, uuid.toString());
@@ -128,7 +136,7 @@ public class Database {
             int count = 0;
             while (rs.next()) {
                 count = rs.getInt("bookcount");
-                applications.add(new Application(rs));
+                applications.add(new Application(rs, main));
             }
             return new ApplicationList(applications, count);
         } catch (SQLException e) {
@@ -137,13 +145,13 @@ public class Database {
         return null;
     }
 
-    public static Application getApplicationById(final Integer id) {
+    public Application getApplicationById(final Integer id) {
         try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM quill WHERE id = ?")) {
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
 
             if(rs.next()) {
-                return new Application(rs);
+                return new Application(rs, main);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -151,7 +159,7 @@ public class Database {
         return null;
     }
 
-    public static boolean updateApplicationStatus(final int id, final int status) {
+    public boolean updateApplicationStatus(final int id, final int status) {
         try (PreparedStatement stmt = connection.prepareStatement("UPDATE quill SET status = ? WHERE id = ?")) {
             stmt.setInt(1, status);
             stmt.setInt(2, id);
@@ -163,13 +171,13 @@ public class Database {
         return false;
     }
 
-    private static final String encodingValue = "a&c@`-8a%";
+    private final String encodingValue = "a&c@`-8a%";
 
-    public static String encode(final List<String> toEncode) {
+    public String encode(final List<String> toEncode) {
         return String.join(encodingValue, toEncode);
     }
 
-    public static List<String> decode(final String toDecode) {
+    public List<String> decode(final String toDecode) {
         return Arrays.asList(toDecode.split(encodingValue));
     }
 

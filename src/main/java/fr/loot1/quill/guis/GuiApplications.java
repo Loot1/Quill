@@ -1,5 +1,6 @@
 package fr.loot1.quill.guis;
 
+import fr.loot1.quill.Quill;
 import fr.loot1.quill.objects.Application;
 import fr.loot1.quill.objects.ApplicationList;
 import fr.loot1.quill.utils.Config;
@@ -33,6 +34,10 @@ public class GuiApplications extends GuiHolder {
 
     List<Boolean> activeButtons = Arrays.asList(false, false, false, false);
 
+    private final Quill main;
+    private final Config config;
+    private final Database database;
+
     @Override
     public @NotNull Inventory getInventory() {
         inventory.clear();
@@ -45,8 +50,8 @@ public class GuiApplications extends GuiHolder {
             OfflinePlayer author = toDisplayBook.getAuthor();
             inventory.setItem(i, playerHeadGui(
                     author,
-                    Config.getColored("menus.all-players.items.player-head.name").replace("%player%", author.getName()).replace("%title%", toDisplayBook.getTitle()),
-                    formatLore(Config.getColoredList("menus.all-players.items.player-head.lore"), toDisplayBook)
+                    config.getColored("menus.all-players.items.player-head.name").replace("%player%", author.getName()).replace("%title%", toDisplayBook.getTitle()),
+                    formatLore(config.getColoredList("menus.all-players.items.player-head.lore"), toDisplayBook)
             ));
             clickableApplications.put(i, toDisplayBook);
         }
@@ -56,20 +61,23 @@ public class GuiApplications extends GuiHolder {
         }
 
         if (page > 0) {
-            inventory.setItem(50, itemGui(Material.ARROW, Config.getColored("menus.global.items.previous-page")));
+            inventory.setItem(50, itemGui(Material.ARROW, config.getColored("menus.global.items.previous-page")));
         }
-        inventory.setItem(53, itemGui(Material.BARRIER, Config.getColored("menus.global.items.close")));
+        inventory.setItem(53, itemGui(Material.BARRIER, config.getColored("menus.global.items.close")));
         if (page < maxPages - 1) {
-            inventory.setItem(51, itemGui(Material.ARROW, Config.getColored("menus.global.items.next-page")));
+            inventory.setItem(51, itemGui(Material.ARROW, config.getColored("menus.global.items.next-page")));
         }
 
         return inventory;
     }
 
-    public GuiApplications(final Player playerWhoClicked, final ApplicationList applicationList) {
+    public GuiApplications(final Player playerWhoClicked, final ApplicationList applicationList, Quill quill) {
         applicationCount = applicationList.getCount();
         applications = applicationList.getData();
-        inventory = Bukkit.createInventory(this, 54, Config.getColored("menus.all-players.title"));
+        main = quill;
+        config = quill.getConfigManager();
+        database = quill.getDatabase();
+        inventory = Bukkit.createInventory(this, 54, config.getColored("menus.all-players.title"));
         playerWhoClicked.openInventory(getInventory());
     }
 
@@ -94,7 +102,7 @@ public class GuiApplications extends GuiHolder {
                 if (click.isLeftClick()) {
                     clickedApplication.open(player);
                 } else if (click.isRightClick()) {
-                    new GuiApplicationManager(player, clickedApplication);
+                    new GuiApplicationManager(player, clickedApplication, main);
                 }
                 break;
             case BARRIER:
@@ -115,7 +123,7 @@ public class GuiApplications extends GuiHolder {
     }
 
     private void refresh() {
-        ApplicationList applicationList = Database.getApplicationsByStatus(activeButtons.get(0), activeButtons.get(1), activeButtons.get(2), activeButtons.get(3), applicationsPerPage, applicationsPerPage * page);
+        ApplicationList applicationList = database.getApplicationsByStatus(activeButtons.get(0), activeButtons.get(1), activeButtons.get(2), activeButtons.get(3), applicationsPerPage, applicationsPerPage * page);
         applicationCount = applicationList.getCount();
         applications = applicationList.getData();
         getInventory();

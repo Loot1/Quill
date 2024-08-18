@@ -18,7 +18,7 @@ import java.util.UUID;
 
 public class Application {
 
-    final static Quill main = Quill.getInstance();
+    private final Database database;
 
     private final int id;
     private final String date;
@@ -35,14 +35,19 @@ public class Application {
 
         private final int value;
         private final Material material;
-        private final String text;
+        private String text;
+        private Config config;
         private final String path;
 
         ApplicationStatus(int value, String path, Material material) {
             this.value = value;
             this.path = path;
-            this.text = Config.getColored("settings.status." + path);
             this.material = material;
+        }
+
+        public void initConfig(Config config) {
+            this.config = config;
+            this.text = config.getColored("settings.status." + path);
         }
 
         public int getValue() { return value; }
@@ -51,7 +56,7 @@ public class Application {
             ItemStack button = new ItemStack(this.material);
             ItemMeta buttonMeta = button.getItemMeta();
             if (buttonMeta != null) {
-                buttonMeta.setDisplayName(Config.getColored("menus.application.items." + this.path + "-color") + this.text);
+                buttonMeta.setDisplayName(config.getColored("menus.application.items." + this.path + "-color") + this.text);
             }
             button.setItemMeta(buttonMeta);
             return button;
@@ -82,7 +87,7 @@ public class Application {
     public OfflinePlayer getAuthor() { return player; }
 
     public boolean setStatus(ApplicationStatus newStatus) {
-        boolean updated = Database.updateApplicationStatus(id, newStatus.getValue());
+        boolean updated = database.updateApplicationStatus(id, newStatus.getValue());
         if(updated) {
             this.status = newStatus;
             return true;
@@ -90,17 +95,22 @@ public class Application {
         return false;
     }
 
-    public Application(ResultSet data) {
+    public Application(ResultSet data, Quill quill) {
+        this.database = quill.getDatabase();
+        Config config = quill.getConfigManager();
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy à HH:mm:ss");
         try {
             this.id = data.getInt("id");
             UUID uuid = UUID.fromString(data.getString("uuid"));
-            this.player = main.getServer().getOfflinePlayer(uuid);
+            this.player = quill.getServer().getOfflinePlayer(uuid);
             this.date = dateFormat.format(data.getTimestamp("createdAt"));
             this.status = ApplicationStatus.fromInteger(data.getInt("status"));
+            for (ApplicationStatus status : ApplicationStatus.values()) {
+                status.initConfig(config);
+            }
             this.title = data.getString("title");
             String content = data.getString("content");
-            this.pages = Database.decode(content);
+            this.pages = database.decode(content);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

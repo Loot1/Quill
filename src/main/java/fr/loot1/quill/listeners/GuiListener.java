@@ -1,5 +1,6 @@
 package fr.loot1.quill.listeners;
 
+import fr.loot1.quill.Quill;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
@@ -9,6 +10,8 @@ import fr.loot1.quill.guis.GuiHolder;
 import org.bukkit.inventory.ItemStack;
 
 public class GuiListener implements Listener {
+
+    public GuiListener(Quill quill) { }
 
     @EventHandler
     private void onInventoryClickEvent(InventoryClickEvent event) {
