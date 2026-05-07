@@ -1,0 +1,93 @@
+[CENTER][SIZE=6][B]📜 Quill — In-game book submission plugin[/B][/SIZE]
+[SIZE=4]Write it, submit it, let the staff review it.[/SIZE][/CENTER]
+
+[CENTER][IMG]https://raw.githubusercontent.com/Loot1/quill/master/.github/assets/gui-applications.png[/IMG][/CENTER]
+
+[SIZE=5][B]📖 What is Quill?[/B][/SIZE]
+
+Quill modernizes a [B]very old-school server workflow[/B]: players write something in a signed book, submit it with a single command, and the staff team reviews it later through a dedicated in-game interface.
+
+The original workflow was simple but awkward — write a book, physically drop it into a hopper, and hope an admin reads it eventually. Quill keeps the charm of that system while replacing everything that made it painful.
+
+Even if its main use case is player applications, the system works for any book-based submission: whitelist forms, staff applications, roleplay character sheets, player reports, event registrations, lore entries, and much more.
+
+[SIZE=5][B]✨ Features[/B][/SIZE]
+[LIST]
+[*][B]One-command submission[/B] — players submit their signed book directly with [ICODE]/quill apply[/ICODE]
+[*][B]MySQL storage[/B] — every submission saves title, content, author UUID, date and status
+[*][B]Paginated review GUI[/B] — staff can browse all submissions in a clean, scrollable interface
+[*][B]Status management[/B] — change submission status (Pending / Accepted / Refused / Archived) from a dedicated GUI
+[CENTER]
+[IMG]https://raw.githubusercontent.com/Loot1/quill/master/.github/assets/gui-application-manager.png[/IMG]
+[/CENTER]
+[*][B]Status filters[/B] — filter the global list by one or multiple statuses using toggle buttons
+[*][B]Per-player view[/B] — browse a specific player's submissions with [ICODE]/quill look <player>[/ICODE]
+[*][B]Self-review[/B] — players can check their own submissions with [ICODE]/quill self[/ICODE]
+[*][B]Staff notification on join[/B] — staff members are notified when there are pending submissions waiting
+[CENTER]
+[IMG]https://raw.githubusercontent.com/Loot1/quill/master/.github/assets/notifications-applications-pending-on-join.png[/IMG]
+[/CENTER]
+[*][B]Discord webhook[/B] — optional webhook notification for every new submission (author, title, page count)
+[*][B]Live reload[/B] — reload the full configuration (including database connection) with [ICODE]/quill reload[/ICODE]
+[*][B]Async database access[/B] — all DB queries run off the main thread to avoid any server lag
+[*][B]Legacy compatibility[/B] — reads and converts old book data formats transparently
+[*][B]Fully customizable[/B] — every message, GUI title, item name and status label is configurable in [ICODE]config.yml[/ICODE]
+[/LIST]
+
+[CENTER]
+[IMG]https://raw.githubusercontent.com/Loot1/quill/master/.github/assets/application-in-book.png[/IMG]
+[/CENTER]
+
+[SIZE=5][B]🚀 Installation[/B][/SIZE]
+[LIST=1]
+[*]Download the [B]Quill[/B] JAR and place it in your [ICODE]plugins/[/ICODE] folder
+[*]Start or restart your server to generate [ICODE]plugins/Quill/config.yml[/ICODE]
+[*]Edit the file and fill in your MySQL credentials
+[*]Optionally paste a Discord webhook URL
+[*]Restart the server or run [ICODE]/quill reload[/ICODE]
+[/LIST]
+
+[SIZE=5][B]⚙️ Commands & Permissions[/B][/SIZE]
+
+[B]Commands:[/B]
+[LIST]
+[*][ICODE]/quill[/ICODE] — Opens the global submissions GUI ([ICODE]quill.look[/ICODE])
+[*][ICODE]/quill apply[/ICODE] — Submits the signed book in the player's main hand ([ICODE]quill.apply[/ICODE])
+[*][ICODE]/quill look <player>[/ICODE] — Opens the submissions of a specific player ([ICODE]quill.look[/ICODE])
+[*][ICODE]/quill self[/ICODE] — Displays the player's own submitted books ([ICODE]quill.self[/ICODE])
+[*][ICODE]/quill reload[/ICODE] — Reloads the configuration ([ICODE]quill.reload[/ICODE])
+[/LIST]
+[B]Permissions:[/B]
+[LIST]
+[*][ICODE]quill.apply[/ICODE] — Allows submitting a signed book
+[*][ICODE]quill.look[/ICODE] — Allows browsing all submissions
+[*][ICODE]quill.self[/ICODE] — Allows viewing own submissions
+[*][ICODE]quill.status[/ICODE] — Allows changing the status of a submission
+[*][ICODE]quill.notify[/ICODE] — Allows receiving pending/new submission notifications
+[*][ICODE]quill.reload[/ICODE] — Allows reloading the plugin configuration
+[*][ICODE]quill.*[/ICODE] — Grants all plugin permissions (OP by default)
+[/LIST]
+
+[SIZE=5][B]🔗 Discord Webhook (optional)[/B][/SIZE]
+
+Quill can send a message to a Discord channel whenever a new book is submitted.
+[LIST=1]
+[*]Create a webhook in your Discord channel settings
+[*]Paste its URL into [ICODE]discord.webhook-url[/ICODE] in [ICODE]config.yml[/ICODE]
+[*]Restart the server or run [ICODE]/quill reload[/ICODE]
+[*]Submit a signed book with [ICODE]/quill apply[/ICODE]
+[/LIST]
+The notification includes the author's name, the book title, and the page count.
+
+[SIZE=5][B]📦 Requirements[/B][/SIZE]
+[LIST]
+[*][B]Spigot / Paper 1.20.6 or higher[/B]
+[*][B]Java 21+[/B]
+[*][B]MySQL database[/B] — [COLOR=Red]Required[/COLOR]
+[/LIST]
+
+[SIZE=5][B]👤 Author[/B][/SIZE]
+[LIST]
+[*][B]Plugin design, development & implementation[/B] — [URL='https://github.com/Loot1']Loot1[/URL]
+[/LIST]
+
