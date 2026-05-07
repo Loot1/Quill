@@ -3,6 +3,7 @@ package fr.loot1.quill.guis;
 import java.util.Arrays;
 import java.util.List;
 
+import fr.loot1.quill.managers.ConfigManager;
 import fr.loot1.quill.objects.Application;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -16,6 +17,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
 public abstract class GuiHolder implements InventoryHolder {
+
+    public static final int APPLICATIONS_PER_PAGE = 45;
+
     public abstract void onInventoryClick(InventoryClickEvent event);
 
     public abstract void onInventoryDrag(InventoryDragEvent event);
@@ -68,11 +72,11 @@ public abstract class GuiHolder implements InventoryHolder {
         return head;
     }
 
-    public List<String> formatLore(final List<String> lore, final Application application) {
+    public List<String> formatLore(final List<String> lore, final Application application, final ConfigManager configManager) {
         lore.replaceAll(s -> s.replaceAll("%player%", application.getAuthor().getName()));
         lore.replaceAll(s -> s.replaceAll("%title%", application.getTitle()));
         lore.replaceAll(s -> s.replaceAll("%date%", application.getDate()));
-        lore.replaceAll(s -> s.replaceAll("%status%", application.getStatus().getText()));
+        lore.replaceAll(s -> s.replaceAll("%status%", application.getStatus().getText(configManager)));
         lore.replaceAll(s -> s.replaceAll("%pages%", String.valueOf(application.getPageNumber())));
         return lore;
     }

@@ -3,137 +3,95 @@ package fr.loot1.quill.guis;
 import fr.loot1.quill.Quill;
 import fr.loot1.quill.objects.Application;
 import fr.loot1.quill.objects.ApplicationList;
-import fr.loot1.quill.utils.Config;
-import fr.loot1.quill.utils.Database;
 import fr.loot1.quill.utils.GlowHelper;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
-public class GuiApplications extends GuiHolder {
+public class GuiApplications extends GuiPaginatedApplications {
 
-    final static int applicationsPerPage = 45;
-    private int applicationCount;
-
-    protected Inventory inventory;
-    protected int page = 0;
-
-    private List<Application> applications;
-
-    HashMap<Integer, Application> clickableApplications = new HashMap<>();
-
-    List<Boolean> activeButtons = Arrays.asList(false, false, false, false);
-
-    private final Quill main;
-    private final Config config;
-    private final Database database;
+    private final List<Boolean> activeButtons = Arrays.asList(false, false, false, false);
 
     @Override
-    public @NotNull Inventory getInventory() {
-        inventory.clear();
+    protected int getCloseSlot() { return 53; }
 
-        int maxPages = (int) Math.ceil((double) applicationCount / applicationsPerPage);
-        page = Math.min(maxPages, page);
-
-        for (int i = 0; i < applications.size(); i++) {
-            Application toDisplayBook = applications.get(i);
-            OfflinePlayer author = toDisplayBook.getAuthor();
-            inventory.setItem(i, playerHeadGui(
-                    author,
-                    config.getColored("menus.all-players.items.player-head.name").replace("%player%", author.getName()).replace("%title%", toDisplayBook.getTitle()),
-                    formatLore(config.getColoredList("menus.all-players.items.player-head.lore"), toDisplayBook)
-            ));
-            clickableApplications.put(i, toDisplayBook);
-        }
-
-        for (Application.ApplicationStatus status : Application.ApplicationStatus.values()) {
-            inventory.setItem(45 + status.getValue(), activeButtons.get(status.getValue()) ? GlowHelper.glow(status.getButton()) : status.getButton());
-        }
-
-        if (page > 0) {
-            inventory.setItem(50, itemGui(Material.ARROW, config.getColored("menus.global.items.previous-page")));
-        }
-        inventory.setItem(53, itemGui(Material.BARRIER, config.getColored("menus.global.items.close")));
-        if (page < maxPages - 1) {
-            inventory.setItem(51, itemGui(Material.ARROW, config.getColored("menus.global.items.next-page")));
-        }
-
-        return inventory;
-    }
+    @Override
+    protected int getPreviousPageSlot() { return 50; }
 
     public GuiApplications(final Player playerWhoClicked, final ApplicationList applicationList, Quill quill) {
+        super(quill);
         applicationCount = applicationList.getCount();
         applications = applicationList.getData();
-        main = quill;
-        config = quill.getConfigManager();
-        database = quill.getDatabase();
-        inventory = Bukkit.createInventory(this, 54, config.getColored("menus.all-players.title"));
+        inventory = Bukkit.createInventory(this, 54, configManager.getColored("menus.all-players.title"));
         playerWhoClicked.openInventory(getInventory());
     }
 
     @Override
-    public void onInventoryClick(InventoryClickEvent event) {
-        final int slot = event.getSlot();
-
-        if(slot > 44 && slot < 49) {
-            final int clickedValue = slot - 45;
-            activeButtons.set(clickedValue, !activeButtons.get(clickedValue));
-            refresh();
-            return;
+    protected void fillContent() {
+        for (int i = 0; i < applications.size(); i++) {
+            Application app = applications.get(i);
+            OfflinePlayer author = app.getAuthor();
+            inventory.setItem(i, playerHeadGui(
+                    author,
+                    configManager.getColored("menus.all-players.items.player-head.name")
+                            .replace("%player%", author.getName() != null ? author.getName() : "?")
+                            .replace("%title%", app.getTitle()),
+                    formatLore(configManager.getColoredList("menus.all-players.items.player-head.lore"), app, configManager)
+            ));
+            clickableApplications.put(i, app);
         }
-
-        final Player player = (Player) event.getWhoClicked();
-        final Material clickedMaterial = event.getCurrentItem().getType();
-
-        switch (clickedMaterial) {
-            case PLAYER_HEAD:
-                final ClickType click = event.getClick();
-                Application clickedApplication = clickableApplications.get(event.getSlot());
-                if (click.isLeftClick()) {
-                    clickedApplication.open(player);
-                } else if (click.isRightClick()) {
-                    new GuiApplicationManager(player, clickedApplication, main);
-                }
-                break;
-            case BARRIER:
-                player.closeInventory();
-                break;
-            case ARROW:
-                if(event.getSlot() == 47) {
-                    page--;
-                } else {
-                    page++;
-                }
-                refresh();
-                break;
-            default:
-                break;
-        }
-
     }
 
-    private void refresh() {
-        ApplicationList applicationList = database.getApplicationsByStatus(activeButtons.get(0), activeButtons.get(1), activeButtons.get(2), activeButtons.get(3), applicationsPerPage, applicationsPerPage * page);
-        applicationCount = applicationList.getCount();
-        applications = applicationList.getData();
-        getInventory();
+    @Override
+    protected void fillExtra() {
+        for (Application.ApplicationStatus status : Application.ApplicationStatus.values()) {
+            inventory.setItem(45 + status.getValue(),
+                    activeButtons.get(status.getValue())
+                            ? GlowHelper.glow(status.getButton(configManager))
+                            : status.getButton(configManager));
+        }
+    }
+
+    @Override
+    protected boolean handleExtraClick(InventoryClickEvent event) {
+        int slot = event.getSlot();
+        if (slot >= 45 && slot <= 48) {
+            int statusValue = slot - 45;
+            activeButtons.set(statusValue, !activeButtons.get(statusValue));
+            refreshAsync();
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    protected void refreshAsync() {
+        final int currentPage  = this.page;
+        final boolean w    = activeButtons.get(0);
+        final boolean a    = activeButtons.get(1);
+        final boolean r    = activeButtons.get(2);
+        final boolean arch = activeButtons.get(3);
+
+        main.getServer().getScheduler().runTaskAsynchronously(main, () ->
+                finishAsyncReload(databaseManager.getApplicationsByStatus(
+                        w, a, r, arch, APPLICATIONS_PER_PAGE, APPLICATIONS_PER_PAGE * currentPage)));
+    }
+
+    @Override
+    public @NotNull Inventory getInventory() {
+        return super.getInventory();
     }
 
     @Override
     public void onInventoryDrag(InventoryDragEvent event) {
-        event.setCancelled(true);
+        super.onInventoryDrag(event);
     }
-
-    public static int getApplicationsPerPage() { return applicationsPerPage; }
 
 }

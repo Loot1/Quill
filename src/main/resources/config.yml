@@ -1,31 +1,34 @@
 messages:
-  configuration-reload: '&7La configuration a été rechargé.'
+  configuration-reload: '&7Configuration has been reloaded.'
   # %author% -> Author name
   # %title% -> Book title
-  apply-done: '&7La candidature &d%title%&7 a été envoyé.'
+  apply-done: '&7Application &d%title%&7 has been submitted.'
   # %author% -> Author name
-  notification-new-apply: '&7[&9Quill&7] &6%author%&7 vient de soumettre une nouvelle candidature.'
+  notification-new-apply: '&7[&9Quill&7] &6%author%&7 just submitted a new application.'
   # %count% -> Applications count
-  notification-on-join: '&7[&9Quill&7] &b%count%&7 candidatures sont en attente.'
+  notification-on-join: '&7[&9Quill&7] &b%count%&7 applications are pending.'
   errors:
-    permission-denied: '&cVous n''avez pas la permission.'
-    console-sender: '&cCette commande n''est pas utilisable depuis la console.'
-    no-application: '&cAucune candidature n''est enregistrée.'
-    item-not-book: '&cL''objet doit être un livre signé.'
+    permission-denied: '&cYou don''t have permission.'
+    console-sender: '&cThis command cannot be used from the console.'
+    no-application: '&cNo applications are registered.'
+    no-application-self: '&cYou have not submitted any applications yet.'
+    item-not-book: '&cThe item must be a signed book.'
+    apply-failed: '&cFailed to submit your application. Please try again later.'
     # %player% -> Player not founded
-    player-not-found: '&c%player% n''a pas été trouvé.'
+    player-not-found: '&c%player% was not found.'
   usages:
-    look: '&cUtilisation : /quill look [joueur]'
-    main: '&cUtilisation : /quill [apply|look|reload]'
+    look: '&cUsage: /quill look <player>'
+    main: '&cUsage: /quill [apply|look|reload|self]'
 
 menus:
   global:
     items:
-      close: '&cQuitter'
-      previous-page: '&7Page précédente'
-      next-page: '&7Page suivante'
+      close: '&cClose'
+      back: '&7Back'
+      previous-page: '&7Previous page'
+      next-page: '&7Next page'
   all-players:
-    title: '&7Candidatures'
+    title: '&7Applications'
     items:
       player-head:
         # %player% -> Author name
@@ -37,14 +40,17 @@ menus:
         # %status% -> Book status
         # %pages% -> Pages number
         lore:
-          - '&7Titre : %title%'
-          - '&7Date : &d%date%'
-          - '&7Status : &b%status%'
-          - '&7Pages : &b%pages%'
+          - '&7Title: %title%'
+          - '&7Date: &d%date%'
+          - '&7Status: &b%status%'
+          - '&7Pages: &b%pages%'
+          - ''
+          - '&7Right click to edit the status.'
+          - '&7Left click to view the content.'
   player:
     # %player% -> Player name
     # %size% -> Total size of player deaths on the server
-    title: '&7Candidatures de &6%player%&7 (%size%)'
+    title: '&7Applications of &6%player%&7 (%size%)'
     items:
       book:
         # %title% -> Book title
@@ -53,9 +59,12 @@ menus:
         # %status% -> Book status
         # %pages% -> Pages number
         lore:
-          - '&7Date : &d%date%'
-          - '&7Status : &b%status%'
-          - '&7Pages : &b%pages%'
+          - '&7Date: &d%date%'
+          - '&7Status: &b%status%'
+          - '&7Pages: &b%pages%'
+          - ''
+          - '&7Right click to edit the status.'
+          - '&7Left click to view the content.'
   application:
     # %mount% -> Book title
     title: '&b%title%'
@@ -67,13 +76,16 @@ menus:
 
 settings:
   status:
-    waiting: "En attente"
-    accepted: "Acceptée"
-    refused: "Refusée"
-    archived: "Archivée"
+    waiting: "Pending"
+    accepted: "Accepted"
+    refused: "Refused"
+    archived: "Archived"
 
 database:
   username: stuffrestoreruser
   password: 42)gZOgw.wd0z3tx
   name: devminecraft
   url: 'localhost:3306'
+
+discord:
+  webhook-url: ''

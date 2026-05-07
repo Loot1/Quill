@@ -1,4 +1,4 @@
-package fr.loot1.quill.utils;
+package fr.loot1.quill.managers;
 
 import fr.loot1.quill.Quill;
 import org.bukkit.OfflinePlayer;
@@ -8,10 +8,12 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerCacheManager implements Listener {
 
-    private final List<String> cachedPlayerNames = new ArrayList<>();
+    private final Set<String> cachedPlayerNames = ConcurrentHashMap.newKeySet();
 
     public PlayerCacheManager(Quill quill) {
         for (OfflinePlayer offlinePlayer : quill.getServer().getOfflinePlayers()) {
@@ -23,14 +25,11 @@ public class PlayerCacheManager implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        String playerName = event.getPlayer().getName();
-        if (!cachedPlayerNames.contains(playerName)) {
-            cachedPlayerNames.add(playerName);
-        }
+        cachedPlayerNames.add(event.getPlayer().getName());
     }
 
     public List<String> getCachedPlayerNames() {
-        return cachedPlayerNames;
+        return new ArrayList<>(cachedPlayerNames);
     }
 
 }

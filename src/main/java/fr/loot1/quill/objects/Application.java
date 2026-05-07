@@ -1,8 +1,8 @@
 package fr.loot1.quill.objects;
 
 import fr.loot1.quill.Quill;
-import fr.loot1.quill.utils.Config;
-import fr.loot1.quill.utils.Database;
+import fr.loot1.quill.managers.ConfigManager;
+import fr.loot1.quill.managers.DatabaseManager;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -18,7 +18,7 @@ import java.util.UUID;
 
 public class Application {
 
-    private final Database database;
+    private final DatabaseManager databaseManager;
 
     private final int id;
     private final String date;
@@ -35,8 +35,6 @@ public class Application {
 
         private final int value;
         private final Material material;
-        private String text;
-        private Config config;
         private final String path;
 
         ApplicationStatus(int value, String path, Material material) {
@@ -45,24 +43,25 @@ public class Application {
             this.material = material;
         }
 
-        public void initConfig(Config config) {
-            this.config = config;
-            this.text = config.getColored("settings.status." + path);
-        }
-
         public int getValue() { return value; }
 
-        public ItemStack getButton() {
+        /** Crée le bouton GUI en lisant la config à chaque appel (reload-safe). */
+        public ItemStack getButton(ConfigManager configManager) {
+            String text = getText(configManager);
             ItemStack button = new ItemStack(this.material);
             ItemMeta buttonMeta = button.getItemMeta();
             if (buttonMeta != null) {
-                buttonMeta.setDisplayName(config.getColored("menus.application.items." + this.path + "-color") + this.text);
+                buttonMeta.setDisplayName(
+                        configManager.getColored("menus.application.items." + this.path + "-color") + text);
             }
             button.setItemMeta(buttonMeta);
             return button;
         }
 
-        public String getText() { return text; }
+        /** Retourne le libellé traduit du statut (reload-safe). */
+        public String getText(ConfigManager configManager) {
+            return configManager.getColored("settings.status." + path);
+        }
 
         public static ApplicationStatus fromInteger(final Integer intfrom) {
             for (ApplicationStatus status : ApplicationStatus.values()) {
@@ -87,8 +86,8 @@ public class Application {
     public OfflinePlayer getAuthor() { return player; }
 
     public boolean setStatus(ApplicationStatus newStatus) {
-        boolean updated = database.updateApplicationStatus(id, newStatus.getValue());
-        if(updated) {
+        boolean updated = databaseManager.updateApplicationStatus(id, newStatus.getValue());
+        if (updated) {
             this.status = newStatus;
             return true;
         }
@@ -96,8 +95,7 @@ public class Application {
     }
 
     public Application(ResultSet data, Quill quill) {
-        this.database = quill.getDatabase();
-        Config config = quill.getConfigManager();
+        this.databaseManager = quill.getDatabaseManager();
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy à HH:mm:ss");
         try {
             this.id = data.getInt("id");
@@ -105,12 +103,8 @@ public class Application {
             this.player = quill.getServer().getOfflinePlayer(uuid);
             this.date = dateFormat.format(data.getTimestamp("createdAt"));
             this.status = ApplicationStatus.fromInteger(data.getInt("status"));
-            for (ApplicationStatus status : ApplicationStatus.values()) {
-                status.initConfig(config);
-            }
             this.title = data.getString("title");
-            String content = data.getString("content");
-            this.pages = database.decode(content);
+            this.pages = databaseManager.decode(data.getString("content"));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -119,7 +113,7 @@ public class Application {
     public void open(final Player player) {
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta bookMeta = (BookMeta) book.getItemMeta();
-        if(bookMeta != null) {
+        if (bookMeta != null) {
             bookMeta.setTitle(title);
             bookMeta.setAuthor(player.getName());
             bookMeta.setGeneration(BookMeta.Generation.ORIGINAL);
