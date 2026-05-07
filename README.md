@@ -1,10 +1,12 @@
 # Quill - Minecraft Plugin
 
-An in-game submission plugin for Minecraft servers that lets players submit signed books and allows staff members to review them later through dedicated GUIs, status management, MySQL storage, and optional Discord notifications.
+Quill is a Minecraft plugin that modernizes a **very old-school server workflow**: players write something in a signed book, submit it, and the staff team reviews it later through an in-game interface.
 
-I created this plugin because, when I was younger, the first Minecraft server I truly spent time on had a long-term progression system based on applications written in books. Players would write their application in-game, drop the signed book into a hopper, and admins would read it afterwards. Quill is the same core idea, rebuilt in a more modern, organized, and practical way for current servers.
+I created this plugin because, when I was younger, the first Minecraft server I truly spent time on had a long-term progression system based on applications written in books. Players would write their application in-game, drop the signed book into a hopper, and admins would read it afterwards.
 
-Even though its main use case is player applications, Quill can also be used for many other book-based workflows: whitelist forms, staff recruitment, roleplay backstories, reports, event registrations, lore submissions, or any system where players need to submit written content directly from Minecraft.
+Even if its main use case is player applications, the system can also be used for many other book-based submissions: whitelist forms, staff applications, roleplay backstories, reports, event registrations, lore entries, or any other workflow where players need to submit structured written content.
+
+Quill keeps the original charm of Minecraft book submissions while removing the awkward parts of the old process.
 
 ## 📋 Features
 
@@ -12,7 +14,8 @@ Even though its main use case is player applications, Quill can also be used for
 - Submit signed books directly with `/quill apply`
 - Save book title, content, author UUID, date, and status in MySQL
 - Read submitted books back in-game through the written book interface
-- Preserve compatibility with legacy stored content while using JSON encoding for newer entries
+
+![Application in book](.github/assets/application-in-book.png)
 
 ### 🧭 Review & Moderation
 - Browse all submissions in a paginated GUI
@@ -21,12 +24,20 @@ Even though its main use case is player applications, Quill can also be used for
 - Change submission status from a dedicated management GUI
 - Filter the global list by status using GUI toggle buttons
 
+![Applications GUI](.github/assets/gui-applications.png)
+![Status management GUI](.github/assets/gui-application-manager.png)
+
 ### 🔧 Advanced Features
 - Full permission management
 - Async database access for submission loading and browsing
 - Reload configuration without restarting the server
 - Staff notification on join when pending submissions exist
 - Fully customizable messages, GUI titles, item names, and status labels
+
+<p>
+  <img src=".github/assets/notifications-new-application.png" alt="New application notification" width="420"/>
+  <img src=".github/assets/notifications-applications-pending-on-join.png" alt="Pending applications notification on join" width="420"/>
+</p>
 
 ### 🤖 Discord Integration
 - Optional webhook notification for new submissions
@@ -36,19 +47,17 @@ Even though its main use case is player applications, Quill can also be used for
 ## 🚀 Installation
 
 ### Requirements
-- A Spigot-compatible Minecraft server
-- Plugin `api-version: 1.20`
-- Java `25`
+- Spigot/Paper Minecraft server 1.20.6 or higher
+- Java 21 or higher
 - MySQL database access
-- Maven (if you want to build from source)
 
 ### Steps
-1. Build the plugin JAR or use the generated one from `target/`.
-2. Place the JAR file in your server's `plugins` folder.
-3. Start or restart the server once to generate `plugins/Quill/config.yml`.
-4. Configure the MySQL connection settings.
-5. Optionally set a Discord webhook URL.
-6. Restart the server.
+1. Download the latest plugin JAR
+2. Place the JAR file in the plugins folder
+3. Start or restart the server once to generate `plugins/Quill/config.yml`
+4. Configure the MySQL connection settings
+5. Optionally set a Discord webhook URL
+6. Restart the server
 
 ## ⚙️ Configuration
 
@@ -56,13 +65,13 @@ Even though its main use case is player applications, Quill can also be used for
 - `plugins/Quill/config.yml` — General configuration for messages, GUI text, statuses, database connection, and Discord webhook
 
 ### Commands
-| Command | Permission | Description |
-|---------|------------|-------------|
-| `/quill` | `quill.look` | Opens the global submissions GUI |
+| Command | Permission | Description                                       |
+|---------|------------|---------------------------------------------------|
+| `/quill` | `quill.look` | Opens the global applications GUI                 |
 | `/quill apply` | `quill.apply` | Submits the signed book in the player's main hand |
-| `/quill look <player>` | `quill.look` | Opens the submissions of a specific player |
-| `/quill self` | `quill.self` | Displays the player's own submitted books |
-| `/quill reload` | `quill.reload` | Reloads the configuration |
+| `/quill look <player>` | `quill.look` | Opens the applications of a specific player       |
+| `/quill self` | `quill.self` | Displays the player's own submitted books         |
+| `/quill reload` | `quill.reload` | Reloads the configuration                         |
 
 ### Permissions
 | Permission | Description | Default |
@@ -91,16 +100,6 @@ Quill currently supports four submission states:
 - `Refused`
 - `Archived`
 
-### Typical Uses
-- Player applications
-- Staff applications
-- Whitelist requests
-- Faction or guild recruitment forms
-- Roleplay character sheets and backstories
-- Player reports
-- Event participation forms
-- Lore or story submissions
-
 ## 📊 Settings Reference
 
 ```yaml
@@ -125,15 +124,12 @@ discord:
   webhook-url: ''
 ```
 
-> [!IMPORTANT]
-> Do not publish real database credentials in a public repository. Replace sensitive values in `config.yml` before sharing the project.
-
 ## 🔗 Discord Webhook Setup
 
-1. Create a webhook in your Discord channel settings.
-2. Paste its URL into `discord.webhook-url`.
-3. Restart the server or run `/quill reload`.
-4. Submit a signed book with `/quill apply`.
+1. Create a webhook in your Discord channel settings
+2. Paste its URL into `discord.webhook-url`
+3. Restart the server or run `/quill reload`
+4. Submit a signed book with `/quill apply`
 
 ### Webhook Message Content
 When enabled, Quill sends a message containing:
@@ -141,13 +137,6 @@ When enabled, Quill sends a message containing:
 - the author name
 - the book title
 - the page count
-
-### Example Configuration
-
-```yaml
-discord:
-  webhook-url: 'https://discord.com/api/webhooks/your_webhook_here'
-```
 
 ## 🗂️ Project Structure
 
@@ -179,18 +168,16 @@ src/main/java/fr/loot1/quill/
 
 ## Dependencies
 
-| Dependency | Type | Notes |
-|------------|------|-------|
-| Spigot API `1.21.11-R0.1-SNAPSHOT` | Provided | Build-time API dependency |
-| Java `25` | Runtime | Defined in `pom.xml` |
-| HikariCP `7.0.2` | Library | Database connection pooling |
-| Gson `2.10.1` | Library | Book content serialization |
-| MySQL | External service | Required for storage |
+| Dependency           | Type | Notes |
+|----------------------|------|-------|
+| HikariCP             | Library | Database connection pooling |
+| Gson                 | Library | Book content serialization |
+| MySQL                | External service | Required for storage |
+| Spigot/Paper 1.20.6+ | Server | — |
+| Java 21+             | Runtime | — |
 
 ## Authors
 
-| Role | Author |
-|------|--------|
-| Plugin design, development, and implementation | **Loot1** |
-
-> This plugin is a modern Minecraft adaptation of an older in-game book submission workflow: write a book, submit it, and let staff review it later.
+| Role | Author                                 |
+|------|----------------------------------------|
+| Plugin design, development, and implementation | [**Loot1**](https://github.com/Loot1) |
