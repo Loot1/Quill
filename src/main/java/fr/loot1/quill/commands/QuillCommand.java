@@ -89,6 +89,9 @@ public class QuillCommand implements CommandExecutor, TabCompleter {
                     final UUID   playerUuid  = p.getUniqueId();
                     final String playerName  = p.getName();
 
+                    final ItemStack bookCopy = book.clone();
+                    p.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
+
                     main.getServer().getScheduler().runTaskAsynchronously(main, () -> {
                         boolean added = databaseManager.addApplication(playerUuid, bookTitle, encoded);
 
@@ -109,15 +112,28 @@ public class QuillCommand implements CommandExecutor, TabCompleter {
                         }
 
                         main.getServer().getScheduler().runTask(main, () -> {
-                            if (!p.isOnline()) return;
                             if (!added) {
-                                p.sendMessage(configManager.getColored("messages.errors.apply-failed"));
+                                if (p.isOnline()) {
+                                    ItemStack currentMainHand = p.getInventory().getItemInMainHand();
+                                    if (currentMainHand.getType().isAir()) {
+                                        p.getInventory().setItemInMainHand(bookCopy);
+                                    } else {
+                                        p.getInventory().addItem(bookCopy)
+                                                .values()
+                                                .forEach(item -> p.getWorld().dropItemNaturally(p.getLocation(), item));
+                                    }
+                                    p.sendMessage(configManager.getColored("messages.errors.apply-failed"));
+                                } else {
+                                    main.getLogger().warning("Application DB insert failed for offline player "
+                                            + playerName + ". Book was returned to world.");
+                                }
                                 return;
                             }
-                            p.getInventory().remove(book);
-                            p.sendMessage(configManager.getColored("messages.apply-done")
-                                    .replace("%title%", bookTitle)
-                                    .replace("%author%", bookAuthor));
+                            if (p.isOnline()) {
+                                p.sendMessage(configManager.getColored("messages.apply-done")
+                                        .replace("%title%", bookTitle)
+                                        .replace("%author%", bookAuthor));
+                            }
                             main.getServer().getOnlinePlayers().stream()
                                     .filter(pl -> pl.hasPermission("quill.notify"))
                                     .forEach(pl -> pl.sendMessage(
@@ -167,7 +183,18 @@ public class QuillCommand implements CommandExecutor, TabCompleter {
                         break;
                     }
                     configManager.reload();
-                    sender.sendMessage(configManager.getColored("messages.configuration-reload"));
+                    main.getServer().getScheduler().runTaskAsynchronously(main, () -> {
+                        try {
+                            databaseManager.reload(configManager);
+                        } catch (Exception e) {
+                            main.getLogger().severe("Database reload failed: " + e.getMessage());
+                            main.getServer().getScheduler().runTask(main, () ->
+                                    sender.sendMessage("§cDatabase connection could not be reloaded. Check console for details."));
+                            return;
+                        }
+                        main.getServer().getScheduler().runTask(main, () ->
+                                sender.sendMessage(configManager.getColored("messages.configuration-reload")));
+                    });
                     break;
 
                 case "self":

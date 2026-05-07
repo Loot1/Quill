@@ -16,11 +16,13 @@ public class PlayerCacheManager implements Listener {
     private final Set<String> cachedPlayerNames = ConcurrentHashMap.newKeySet();
 
     public PlayerCacheManager(Quill quill) {
-        for (OfflinePlayer offlinePlayer : quill.getServer().getOfflinePlayers()) {
-            if (offlinePlayer.getName() != null) {
-                cachedPlayerNames.add(offlinePlayer.getName());
+        quill.getServer().getScheduler().runTaskAsynchronously(quill, () -> {
+            for (OfflinePlayer offlinePlayer : quill.getServer().getOfflinePlayers()) {
+                if (offlinePlayer.getName() != null) {
+                    cachedPlayerNames.add(offlinePlayer.getName());
+                }
             }
-        }
+        });
     }
 
     @EventHandler

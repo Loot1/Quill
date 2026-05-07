@@ -73,11 +73,14 @@ public abstract class GuiHolder implements InventoryHolder {
     }
 
     public List<String> formatLore(final List<String> lore, final Application application, final ConfigManager configManager) {
-        lore.replaceAll(s -> s.replaceAll("%player%", application.getAuthor().getName()));
-        lore.replaceAll(s -> s.replaceAll("%title%", application.getTitle()));
-        lore.replaceAll(s -> s.replaceAll("%date%", application.getDate()));
-        lore.replaceAll(s -> s.replaceAll("%status%", application.getStatus().getText(configManager)));
-        lore.replaceAll(s -> s.replaceAll("%pages%", String.valueOf(application.getPageNumber())));
+        String authorName = application.getAuthor().getName();
+        String playerDisplay = authorName != null ? authorName : "?";
+        lore.replaceAll(s -> s
+                .replace("%player%", playerDisplay)
+                .replace("%title%", application.getTitle())
+                .replace("%date%", application.getDate())
+                .replace("%status%", application.getStatus().getText(configManager))
+                .replace("%pages%", String.valueOf(application.getPageNumber())));
         return lore;
     }
 

@@ -19,15 +19,23 @@ import java.util.stream.Collectors;
 public class DatabaseManager {
 
     private final Quill main;
-    private final HikariDataSource dataSource;
+    private volatile HikariDataSource dataSource;
 
     private static final Gson GSON = new Gson();
     private static final String LEGACY_SEPARATOR = "a&c@`-8a%";
 
     public DatabaseManager(Quill quill) {
         this.main = quill;
-        ConfigManager configManager = quill.getConfigManager();
+        try {
+            this.dataSource = buildDataSource(quill.getConfigManager());
+            initTables();
+        } catch (Exception e) {
+            main.getLogger().log(Level.SEVERE, "Database initialization failed", e);
+            throw new RuntimeException("Database initialization failed", e);
+        }
+    }
 
+    private HikariDataSource buildDataSource(ConfigManager configManager) {
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setJdbcUrl("jdbc:mysql://" + configManager.get("database.url") + "/" + configManager.get("database.name"));
         hikariConfig.setUsername(configManager.get("database.username"));
@@ -37,13 +45,18 @@ public class DatabaseManager {
         hikariConfig.setIdleTimeout(60000);
         hikariConfig.setMaxLifetime(1800000);
         hikariConfig.setLeakDetectionThreshold(5000);
+        return new HikariDataSource(hikariConfig);
+    }
 
+    public void reload(ConfigManager configManager) {
+        close();
         try {
-            this.dataSource = new HikariDataSource(hikariConfig);
+            this.dataSource = buildDataSource(configManager);
             initTables();
+            main.getLogger().info("Database connection reloaded successfully.");
         } catch (Exception e) {
-            main.getLogger().log(Level.SEVERE, "Database initialization failed", e);
-            throw new RuntimeException("Database initialization failed", e);
+            main.getLogger().log(Level.SEVERE, "Database reload failed", e);
+            throw new RuntimeException("Database reload failed", e);
         }
     }
 
@@ -59,7 +72,7 @@ public class DatabaseManager {
                         + "createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"
                         + "status INT(1) NOT NULL,"
                         + "title CHAR(32) NOT NULL,"
-                        + "content TEXT"
+                        + "content MEDIUMTEXT"
                         + ")"
         )) {
             stmt.execute();
@@ -242,6 +255,16 @@ public class DatabaseManager {
         return false;
     }
 
+    public int countWaitingApplications() {
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM quill WHERE status = 0");
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            main.getLogger().log(Level.SEVERE, "Error counting waiting applications", e);
+        }
+        return 0;
+    }
 
     public String encode(final List<String> toEncode) {
         return GSON.toJson(toEncode);
@@ -249,10 +272,15 @@ public class DatabaseManager {
 
     public List<String> decode(final String toDecode) {
         if (toDecode == null || toDecode.isEmpty()) return List.of();
-        if (toDecode.startsWith("[")) {
-            return GSON.fromJson(toDecode, new TypeToken<List<String>>() {}.getType());
+        try {
+            if (toDecode.startsWith("[")) {
+                return GSON.fromJson(toDecode, new TypeToken<List<String>>() {}.getType());
+            }
+            return Arrays.asList(toDecode.split(java.util.regex.Pattern.quote(LEGACY_SEPARATOR)));
+        } catch (Exception e) {
+            main.getLogger().warning("Failed to decode book content, returning empty pages: " + e.getMessage());
+            return List.of();
         }
-        return Arrays.asList(toDecode.split(java.util.regex.Pattern.quote(LEGACY_SEPARATOR)));
     }
 
 }

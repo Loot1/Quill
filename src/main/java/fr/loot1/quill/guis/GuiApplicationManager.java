@@ -18,6 +18,7 @@ public class GuiApplicationManager extends GuiHolder {
     protected Inventory inventory;
     private final Application application;
     private final ConfigManager configManager;
+    private final Quill main;
 
     @Nullable
     private final GuiHolder previousGui;
@@ -25,6 +26,7 @@ public class GuiApplicationManager extends GuiHolder {
     public GuiApplicationManager(final Player playerWhoClicked, final Application app, final Quill quill, @Nullable final GuiHolder previousGui) {
         application = app;
         configManager = quill.getConfigManager();
+        this.main = quill;
         this.previousGui = previousGui;
         playerWhoClicked.openInventory(getInventory());
     }
@@ -66,12 +68,16 @@ public class GuiApplicationManager extends GuiHolder {
                 final Application.ApplicationStatus oldStatus = application.getStatus();
                 if (slot != oldStatus.getValue()) {
                     if (player.hasPermission("quill.status")) {
-                        final Application.ApplicationStatus newStatus =
-                                Application.ApplicationStatus.fromInteger(slot);
-                        if (application.setStatus(newStatus)) {
-                            inventory.setItem(slot, GlowHelper.glow(newStatus.getButton(configManager)));
-                            inventory.setItem(oldStatus.getValue(), oldStatus.getButton(configManager));
-                        }
+                        final Application.ApplicationStatus newStatus = Application.ApplicationStatus.fromInteger(slot);
+                        main.getServer().getScheduler().runTaskAsynchronously(main, () -> {
+                            boolean updated = application.setStatus(newStatus);
+                            main.getServer().getScheduler().runTask(main, () -> {
+                                if (updated && player.isOnline()) {
+                                    inventory.setItem(slot, GlowHelper.glow(newStatus.getButton(configManager)));
+                                    inventory.setItem(oldStatus.getValue(), oldStatus.getButton(configManager));
+                                }
+                            });
+                        });
                     } else {
                         player.sendMessage(configManager.getColored("messages.errors.permission-denied"));
                         player.closeInventory();

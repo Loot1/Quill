@@ -1,7 +1,6 @@
 package fr.loot1.quill.listeners;
 
 import fr.loot1.quill.Quill;
-import fr.loot1.quill.objects.ApplicationList;
 import fr.loot1.quill.managers.ConfigManager;
 import fr.loot1.quill.managers.DatabaseManager;
 import org.bukkit.entity.Player;
@@ -26,14 +25,12 @@ public class PlayerJoinListener implements Listener {
         Player player = event.getPlayer();
         if (!player.hasPermission("quill.notify")) return;
         main.getServer().getScheduler().runTaskAsynchronously(main, () -> {
-            ApplicationList applicationList = databaseManager.getApplicationsByStatus(true, false, false, false, 1, 0);
-            if (applicationList == null) return;
-            int applicationCount = applicationList.getCount();
-            if (applicationCount > 0) {
+            int count = databaseManager.countWaitingApplications();
+            if (count > 0) {
                 main.getServer().getScheduler().runTask(main, () -> {
                     if (player.isOnline()) {
                         player.sendMessage(configManager.getColored("messages.notification-on-join")
-                                .replace("%count%", String.valueOf(applicationCount)));
+                                .replace("%count%", String.valueOf(count)));
                     }
                 });
             }

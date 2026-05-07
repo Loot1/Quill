@@ -70,8 +70,7 @@ public class Application {
                 }
             }
             throw new IllegalArgumentException("Invalid status value : " + intfrom);
-        }
-    }
+        }    }
 
     public int getId() { return id; }
 
@@ -102,7 +101,18 @@ public class Application {
             UUID uuid = UUID.fromString(data.getString("uuid"));
             this.player = quill.getServer().getOfflinePlayer(uuid);
             this.date = dateFormat.format(data.getTimestamp("createdAt"));
-            this.status = ApplicationStatus.fromInteger(data.getInt("status"));
+
+            int statusInt = data.getInt("status");
+            ApplicationStatus parsedStatus;
+            try {
+                parsedStatus = ApplicationStatus.fromInteger(statusInt);
+            } catch (IllegalArgumentException e) {
+                quill.getLogger().warning("Unknown status value " + statusInt
+                        + " for application #" + this.id + ", defaulting to ARCHIVED.");
+                parsedStatus = ApplicationStatus.ARCHIVED;
+            }
+            this.status = parsedStatus;
+
             this.title = data.getString("title");
             this.pages = databaseManager.decode(data.getString("content"));
         } catch (SQLException e) {
@@ -110,17 +120,18 @@ public class Application {
         }
     }
 
-    public void open(final Player player) {
+    public void open(final Player viewer) {
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta bookMeta = (BookMeta) book.getItemMeta();
         if (bookMeta != null) {
             bookMeta.setTitle(title);
-            bookMeta.setAuthor(player.getName());
+            String authorName = player.getName();
+            bookMeta.setAuthor(authorName != null ? authorName : "Unknown");
             bookMeta.setGeneration(BookMeta.Generation.ORIGINAL);
             bookMeta.setPages(pages);
         }
         book.setItemMeta(bookMeta);
-        player.openBook(book);
+        viewer.openBook(book);
     }
 
 }
