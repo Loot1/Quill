@@ -11,6 +11,7 @@ public class ConfigManager {
 
     private final Quill main;
     private final File configFile;
+    private FileConfiguration config;
 
     public ConfigManager(Quill quill) {
         this.main = quill;
@@ -27,6 +28,7 @@ public class ConfigManager {
         if (!configFile.exists()) {
             create();
         }
+        this.config = main.getConfig();
     }
 
     public void reload() {
@@ -36,10 +38,10 @@ public class ConfigManager {
             create();
         }
         main.reloadConfig();
+        this.config = main.getConfig();
     }
 
     public List<String> getColoredList(final String path) {
-        FileConfiguration config = main.getConfig();
         if (config.contains(path)) {
             List<String> messages = config.getStringList(path);
             messages.replaceAll(msgToColor -> ChatColor.translateAlternateColorCodes('&', msgToColor));
@@ -50,7 +52,6 @@ public class ConfigManager {
     }
 
     public String getColored(final String path) {
-        FileConfiguration config = main.getConfig();
         if (config.contains(path)) {
             return ChatColor.translateAlternateColorCodes('&', config.getString(path));
         }
@@ -59,7 +60,6 @@ public class ConfigManager {
     }
 
     public String get(final String path) {
-        FileConfiguration config = main.getConfig();
         if (config.contains(path)) {
             return config.getString(path);
         }
